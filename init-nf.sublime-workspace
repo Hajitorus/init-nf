@@ -1,0 +1,336 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"t",
+				"t"
+			],
+			[
+				"v",
+				"v"
+			],
+			[
+				"group",
+				"group"
+			],
+			[
+				"str",
+				"str"
+			],
+			[
+				"evaluate",
+				"evaluateOrDie"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 87.0,
+		"selected_items":
+		[
+			[
+				"instal",
+				"Package Control: Install Package"
+			],
+			[
+				"acf",
+				"Git: Add Current File"
+			],
+			[
+				"pyt",
+				"Set Syntax: Python"
+			],
+			[
+				"package",
+				"Package Control: Discover Packages"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"push",
+				"Git: Push"
+			],
+			[
+				"qcc",
+				"Git: Quick Commit Current File"
+			],
+			[
+				"qc",
+				"Git: Quick Commit"
+			],
+			[
+				"qcom",
+				"Git: Quick Commit Current File"
+			],
+			[
+				"coffee",
+				"Coffee: Check Syntax"
+			],
+			[
+				"stat",
+				"Git: Status"
+			],
+			[
+				"q",
+				"Git: Quick Commit"
+			],
+			[
+				"qco",
+				"Git: Quick Commit"
+			],
+			[
+				"forma",
+				"Format: CoffeeScript"
+			],
+			[
+				"remove",
+				"Package Control: Remove Package"
+			],
+			[
+				"git stat",
+				"Git: Status"
+			],
+			[
+				"status",
+				"Git: Status"
+			],
+			[
+				"coffe",
+				"Set Syntax: CoffeeScript"
+			]
+		],
+		"width": 449.0
+	},
+	"console":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/Users/damian/Dropbox/Stash/git/init-nf/es/main/env.es",
+		"/Users/damian/Dropbox/Stash/git/init-nf/es/main/startup.es",
+		"/Users/damian/Dropbox/Stash/git/init-nf/es/main/esrc.es",
+		"/Users/damian/Dropbox/Stash/git/init-nf/es/lib/subr.es",
+		"/Volumes/ins/ITS/ITS-Projects/INS Projects_Active/INS352 - Corporate Backup 2013 Project/Supporting Doc/NAS Backup/lessons-learned-log-draft.txt",
+		"/Users/damian/Dropbox/Library/Scripts/track-vids-other",
+		"/Users/damian/Dropbox/Library/Scripts/track-vids",
+		"/Users/damian/Dropbox/Library/Scripts/symlink-latest",
+		"/Users/damian/Dropbox/Library/Scripts/ytid",
+		"/Users/damian/Dropbox/Library/Scripts/get-subs",
+		"/Users/damian/jekor.xml",
+		"/Users/damian/Dropbox/Stash/git/pilotssh.json",
+		"/Users/damian/.ssh/authorized_keys",
+		"/Users/damian/get_ytuser_count",
+		"/Users/damian/Desktop/ost-fim.xml",
+		"/Users/damian/Dropbox/Library/Scripts/stalk-st",
+		"/Users/damian/Dropbox/Stash/git/servdesk/cifs-shares.txt",
+		"/Users/damian/Dropbox/Stash/git/servdesk/.gitignore",
+		"/Users/damian/Dropbox/Stash/git/casperjs/gusso.coffee",
+		"/Users/damian/Dropbox/Stash/git/haskell/simple-api-get.hs",
+		"/Users/damian/Dropbox/Stash/git/casperjs/sdtool.py",
+		"/Users/damian/Dropbox/Stash/git/casperjs/gusso.py",
+		"/Users/damian/Dropbox/Stash/git/casperjs/sdtable.py",
+		"/Users/damian/Dropbox/Stash/git/casperjs/sdttable.py",
+		"/Users/damian/Dropbox/Stash/git/casperjs/sdt.py",
+		"/Users/damian/Dropbox/Stash/git/casperjs/auth.py",
+		"/Users/damian/Library/Application Support/Sublime Text 3/Packages/User/Preferences.sublime-settings",
+		"/usr/local/Cellar/casperjs/1.0.2/libexec/samples/multirun.coffee",
+		"/Users/damian/Dropbox/Stash/git/samfs-tools/check_samfs_dumps",
+		"/Users/damian/qna.sh",
+		"/Users/damian/Dropbox/Stash/git/samfs-tools/qna.sh",
+		"/Users/damian/Library/Application Support/Sublime Text 3/Packages/SublimeLinter/README.md",
+		"/Users/damian/accept-the-coc.coffee",
+		"/Users/damian/bb-prod-hosts.txt",
+		"/Users/damian/Google Drive/RFC 12084 exportfs"
+	],
+	"find":
+	{
+		"height": 22.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"symantec",
+			"netapp",
+			"netbackup",
+			"i",
+			"source",
+			"cutoff",
+			"filetime",
+			"collect_recent_vids",
+			"missed",
+			"latest",
+			"base_dir",
+			"great",
+			":",
+			"class",
+			"short_desc",
+			"ag",
+			"sms_id",
+			"key",
+			" :: .*",
+			"debug",
+			"print",
+			"valid",
+			"cre",
+			"sys_id",
+			"xml",
+			"\\), ",
+			"), ",
+			"itemgetter",
+			"attrgetter",
+			"job_li",
+			"get_date",
+			"casper.",
+			"path",
+			"\\n",
+			":"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": true,
+		"replace_history":
+		[
+			"\\n",
+			"",
+			"\\),\\n",
+			"),\\n",
+			"ig",
+			"ag",
+			":",
+			"\\n"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 22.0
+	},
+	"input":
+	{
+		"height": 31.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 260.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"output.git-commit":
+	{
+		"height": 100.0
+	},
+	"output.git-push":
+	{
+		"height": 100.0
+	},
+	"project": "init-nf.sublime-project",
+	"replace":
+	{
+		"height": 40.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 150.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

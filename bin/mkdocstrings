@@ -1,0 +1,195 @@
+#!/bin/sh
+# mkdocstrings --- make docstrings database for shell libraries
+# Author: Noah Friedman <friedman@prep.ai.mit.edu>
+# Created: 1992-06-18
+# Last modified: 1993-09-26
+# Public domain
+
+# Commentary:
+# Code:
+
+# Name by which this script was invoked. 
+progname=`basename $0`
+
+# Substitute your usage string here. 
+usage="${progname} {-D} {-d docfile} {-h} {-v} [file1] {...}
+       {--debug} {--docstrings-file=docfile} {--help} {--verbose}
+
+-D, --debug                  Turn on shell debugging (\"set -x\").
+-d, --docstrings-file FILE   Pathname of docstring file (sans .dta or .idx)
+-h, --help                   You're looking at it.
+-v, --verbose                Print filenames as they are processed.
+"
+
+# To prevent hairy quoting and escaping later.
+bq="\`"
+eq="'"
+
+# Since we don't have shell functions, this is a kludge that at least
+# reduces some of the redunancy therefore necessary.  Yes, this is evil.
+# Get a shell with functions and you won't have to contemplate this
+# horror.
+#
+# Usage: value="`(set - \"$1\" \"$2\"; eval \"${get_option_argument}\")`"
+#    Long option syntax is `--foo=bar' or `--foo bar'.  3rd argument ARG
+#    won't get used if first long option syntax was used. 
+#
+# Returns number of positions caller should shift.
+# If retval > 2, caller should exit.
+# Only use this if option is supposed to have a mandatory argument. 
+get_option_argument='
+    option="$1";
+    arg="$2";
+
+    # All long options must be at least 3 characters long (--o*), whereas
+    # short options are only two chars (-o) and arguments are separate.
+    option_length="`awk \"END { print length(option); }\" option=\"${option}\" /dev/null`"
+    arg="`echo ${option} | sed \"s/^[^=]*=//\"`" # Strip off anything before and including = char
+    if [ ${option_length} -ge 3 -a "z${option}" != "z${arg}" ]; then
+       echo "${arg}"
+       exit 1
+    else
+       if [ -z "${2}" ]; then
+          echo "${progname}: option ${bq}${option}${eq} requires argument." 1>&2
+          echo "${usage}" 1>&2
+          exit 3
+       fi
+       echo "${2}"
+       exit 2
+    fi
+  '
+
+# *sigh* this is annoying.  Some bourne shells don't allow a
+# numeric argument to shift.
+# Usage: 'eval "shift_num=n; ${shift_n_times}"'
+shift_n_times='
+   while [ ${shift_num} -gt 0 ]; do
+      shift_num="`expr ${shift_num} - 1`"
+      shift
+   done;
+  '
+
+# Unset any variables set by options below, if you don't want to take the
+# chance that they may be exported from the environment
+# Don't actually use `unset' since old bourne shells don't have this
+# command.  Instead, assign them an empty value. 
+#unset debug
+debug=""
+
+# Parse command line arguments. 
+# If you add new options be sure to change the wildcards below to make
+# sure they are unambiguous (i.e. only match one possible long option)
+# Be sure to show at least one instance of the full long option name to
+# document what the long option is canonically called. 
+# Long options which take arguments will need a `*' appended to the
+# canonical name to match the value appended after the `=' character. 
+while [ "$#" != "0" ]; do
+   case z$1 in 
+      z-D | z--debug | z--de* )
+         debug=t
+         shift
+        ;;
+      z-h | z--help | z--h )
+         echo "${usage}" 1>&2
+         exit 1
+        ;;
+      z-v | z--verbose | z--v* )
+         verbose=t
+         shift
+        ;;
+      z-d | z--docstrings-file* | z--do* )
+         docstring_file="`(set - \"$1\" \"$2\"; eval \"${get_option_argument}\")`"
+         retval=$?
+         if [ ${retval} -gt 2 ]; then
+            # Already printed usage
+            exit 1
+         fi
+         eval "shift_num=${retval}; ${shift_n_times}"
+        ;;
+      z-- )     # Stop option processing
+        shift
+        break
+       ;;
+      z-* )
+        echo "${progname}: unknown option \`$1'" 1>&2
+        echo "${usage}" 1>&2
+        exit 1
+       ;;
+      * )
+        break
+       ;;
+   esac
+done
+
+test "${debug}" = "t" && set -x
+
+if test $# = 0 ; then
+   echo "${usage}" 1>&2
+   exit 1
+fi
+
+awk 'BEGIN {
+        dta_file = "'"${docstring_file}"'.dta"
+        idx_file = "'"${docstring_file}"'.idx"
+        start_line = end_line = 0
+        in_docstring_p = 0
+        old_FILENAME=""
+     }
+
+     { 
+        if (verbosep && old_FILENAME != FILENAME) {
+           basename = FILENAME
+           while (match(basename, "/")) {
+              basename = substr(basename, RSTART + 1);
+           }
+           print "Reading docstrings from " basename "..."
+           old_FILENAME = FILENAME
+        }
+     }
+
+     /[ \t]*#:docstring/ {
+        if (! in_docstring_p) {
+           function_name_start_pos = match($0, "#:docstring[ \t][ \t]*");
+           # if there is no function name associated with this docstring,
+           # abandon it. 
+           if (! function_name_start_pos) next
+
+           # This gets rid of trailing ":" char
+           startpos = RSTART + RLENGTH
+           function_name = substr($0, startpos, length($0) - startpos);
+
+           start_line = end_line + 1; 
+           in_docstring_p = 1;
+
+           # We do not actually put this line in the database
+           next;
+        }
+     }
+
+     /[ \t]*#:end[ \t][ \t]*docstring:/ {
+        if (in_docstring_p) {
+           print function_name " " start_line " " end_line > idx_file; 
+           in_docstring_p = 0;
+        }
+     }
+
+     {
+        if (in_docstring_p) {
+           doc_start_idx = match($0, "[ \t]*#");
+           if (! doc_start_idx) next
+           $0 = substr($0, RSTART + RLENGTH);
+           # Strip 1 leading space, if there is one. 
+           firstchar = substr($0, 1, 1);
+           if (firstchar == " ")
+              print substr($0, 2) > dta_file 
+           else
+              print $0 > dta_file
+           end_line = end_line + 1;
+        }
+     }' docstring_file="${docstring_file}" verbosep="${verbose}" ${1+"$@"}
+
+if test -n "${verbose}" ; then
+   echo "Done."
+fi
+
+# mkdocstrings ends here

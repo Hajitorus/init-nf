@@ -1,0 +1,47 @@
+#!/bin/sh
+# recordlog --- record comings and goings
+# Author: Noah Friedman <friedman@prep.ai.mit.edu>
+# Created: 1992-01-17
+# Last modified: 1994-03-14
+# Public domain
+
+# Commentary:
+
+# This script should be executed upon login and logout, with the arguments
+# "in" and "out" in each case respectively.
+
+# Code:
+
+# Find out if we're logging in or out.  If the command argument is null or
+# meaningless, we assume neither.
+case "z${1}" in 
+   zin ) 	log="Login  " ;;
+   zout )	log="Logout " ;;
+   z* )	        log="Unknown" ;;
+esac
+
+if [ ! "${LOGFILE}" ]; then LOGFILE="${HOME}/.loginlog"; fi
+
+tty="`tty 2> /dev/null | sed 's/\/dev\///`"
+hostname="`hostname | sed 's/\..*//'`"
+date="`date`"
+
+consolep="nil"
+case "${tty}" in
+   # /dev/hft/* are AIX consoles (of which there may be more than one)
+   console | hft/* )
+      consolep="t"
+     ;;
+esac
+
+if [ "${log}" = "Login  " -a "${consolep}" != "t" ]; then
+   qtty="`echo ${tty} | sed 's/\//\\\\\//g'`"
+   rhost=`who | sed -n '/'"${qtty}"'/{s/^[^(]*(*\([^)]*\)).*/\1/p;q;}'`
+   if [ "${rhost}" = "" ]; then rhost="unknown"; fi
+
+   echo "${log} ${hostname} ${tty} ${date} from ${rhost}" >> ${LOGFILE}
+else
+   echo "${log} ${hostname} ${tty} ${date}" >> ${LOGFILE}
+fi
+
+# recordlog ends here

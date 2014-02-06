@@ -1,0 +1,366 @@
+# paths/path --- directories to go in standard path
+# Author: Noah Friedman <friedman@splode.com>
+# Created: 1992-03-05
+# Public domain
+#
+# $Id: path,v 1.47 2007/11/13 03:55:24 friedman Exp $
+#
+# It is possible to use environment variables and subshell commands (stuff
+# in `...`) to get the desired path.  See the examples here.
+#
+# Lines beginning with a '#' are comments.  It's not possible to put
+# comments on the same line as a pathname component.
+
+### Personal
+
+$HOME/bin/local
+$HOME/bin/links
+$HOME/bin/misc
+$HOME/bin/share
+$sinit/local/bin
+$sinit/bin
+
+### Netscape Communications Corp.
+
+# Netscape system directories.  These must go before /usr/local/bin, which
+# is deprecated there and tends to have broken tools.
+#/tools/ns/bin
+#/tools/ns/sbin
+#/tools/contrib/bin
+#/tools/contrib/sbin
+#/.secure/bin
+
+### General bin directories
+
+# Lude depot directories
+/opt/lude/bin
+/usr/lude/bin
+
+# gnu/bin directories
+/opt/gnu/bin
+/usr/local/gnu/bin
+/usr/local/gnubin
+/usr/local/gnu
+/usr/gnu/bin
+/gnu/bin
+
+# local/bin directories
+/opt/local/bin
+/usr/local/bin
+/local/bin
+
+# Other bin directories
+/usr/pkg/bin
+/usr/sww/bin
+/usr/site/bin
+/usr/site
+/usr/releng/bin
+/usr/bin
+/bin
+
+/usr/xpg6/bin
+/usr/xpg4/bin
+/usr/5bin
+
+### General sbin directories
+
+# Lude depot directories
+/opt/lude/sbin
+/usr/lude/sbin
+
+# gnu/sbin directories
+/opt/gnu/sbin
+/usr/local/gnu/sbin
+/usr/gnu/sbin
+/gnu/sbin
+
+# local/sbin directories
+/opt/local/sbin
+/usr/local/sbin
+/local/sbin
+
+# Other sbin directories
+/usr/pkg/sbin
+/usr/sww/sbin
+/usr/sbin
+/sbin
+/usr/athena/sbin
+
+### Package directories
+
+# TeX
+/opt/tex/bin
+/opt/local/tex/bin
+/usr/local/gnu/tex/bin
+/usr/local/tex/bin
+/usr/tex/bin
+/usr/TeX/bin
+
+# Kerberos utilities
+/usr/local/kerberos/bin
+/usr/local/kerberos/sbin
+
+# netpbm image conversion utilities
+/opt/netpbm/bin
+/usr/local/netpbm/bin
+
+# pbmplus image conversion utilities
+/opt/pbmplus/bin
+/usr/local/pbmplus/bin
+
+# LISP
+/opt/lisp/bin
+/usr/local/lisp/bin
+
+# Java
+/opt/java/bin
+/usr/local/java/bin
+/usr/java/bin
+/usr/j2se/bin
+
+# LDAP (Lightweight Directory Access Protocol)
+/opt/ldap/bin
+/usr/local/ldap/bin
+
+# GIMP (Gnu Image Manipulation Program)
+/opt/gimp/bin
+/usr/local/gimp/bin
+
+# Mozilla
+/opt/netscape/bin
+/usr/local/netscape/bin
+
+# HP printer tools
+/opt/hpnp/bin
+/usr/local/hpnp/bin
+
+# HP-UX vendor compiler
+/opt/aCC/bin
+
+# Misc
+/usr/local/ssl/bin
+/usr/local/samba/bin
+/usr/local/samba/sbin
+/usr/local/BerkeleyDB/bin
+
+### X11 directories
+
+/opt/X11/bin
+/opt/local/X11/bin
+/usr/local/X11/bin
+/usr/local/bin/X11
+/usr/X11/bin
+/usr/bin/X11
+
+/opt/X11R6.3/bin
+/opt/local/X11R6.3/bin
+/usr/local/X11R6.3/bin
+/usr/local/bin/X11R6.3
+/usr/X11R6.3/bin
+/usr/bin/X11R6.3
+
+/opt/X11R6.1/bin
+/opt/local/X11R6.1/bin
+/usr/local/X11R6.1/bin
+/usr/local/bin/X11R6.1
+/usr/X11R6.1/bin
+/usr/bin/X11R6.1
+
+/opt/X11R6/bin
+/opt/local/X11R6/bin
+/usr/local/X11R6/bin
+/usr/local/bin/X11R6
+/usr/X11R6/bin
+/usr/bin/X11R6
+
+/opt/X11R5/bin
+/opt/local/X11R5/bin
+/usr/local/X11R5/bin
+/usr/local/bin/X11R5
+/usr/X11R5/bin
+/usr/bin/X11R5
+
+/opt/X11R4/bin
+/opt/local/X11R4/bin
+/usr/local/X11R4/bin
+/usr/local/bin/X11R4
+/usr/X11R4/bin
+/usr/bin/X11R4
+
+/usr/openwin/bin
+/usr/dt/bin
+
+/opt/Motif*/bin
+/usr/local/Motif*/bin
+
+/opt/ncd/bin
+/usr/local/ncd/bin
+
+# Old versions of XFree86 on early netbsd and linux systems.
+/usr/X386/bin
+/usr/XFree86/bin/X11
+
+### Solaris 2.x and other SVR4 systems
+
+# Solaris 2.x
+/opt/RICHPse/bin
+/opt/SUNWdiag/bin
+/opt/SUNWspro/bin
+/opt/SUNWspci/bin
+/opt/SUNWwabi/bin
+/opt/SUNWhwrdg
+/opt/SUNWvts/bin
+/opt/TWWfsw/bin
+/usr/opt/SUNWmd/sbin
+/usr/proc/bin
+/usr/vmsys/bin
+#/usr/platform/`(uname -m) 2>/dev/null`/sbin
+/usr/platform/sun4u/sbin
+/usr/platform/i86pc/sbin
+
+# sunfreeware dirs in solaris10
+/usr/sfw/bin
+/usr/sfw/sbin
+/usr/sfw/libexec
+/usr/sfw/lib
+
+# veritas vxvm/vxfs on solaris
+/etc/vx/bin
+/usr/lib/fs/vxfs
+/usr/lib/vxvm/bin
+
+/usr/lib/mozldap
+/usr/lib64/mozldap
+
+/usr/ccs/bin
+/usr/public/bin
+/usr/freeware/bin
+/usr/athena/bin
+/usr/amiga/bin
+/usr/net/bin
+/usr/atria/bin
+
+### General libexec directories
+
+# Lude depot directories
+/opt/lude/libexec
+/usr/lude/lubexec
+
+# gnu/libexec directories
+/opt/gnu/libexec
+/usr/local/gnu/libexec
+/usr/gnu/libexec
+/gnu/libexec
+
+# local/libexec directories
+/opt/local/libexec
+/usr/local/libexec
+/local/libexec
+
+# Other libexec directories
+/usr/pkg/libexec
+/usr/libexec
+
+### UCB directories
+
+# These come after most other bin directories because on SVR4 systems, the
+# programs in this directory are frequently broken to the point of
+# unusability.
+
+/usr/bsd
+/usr/ucb
+
+### General lib directories
+
+# These are nearly last because lib directories are not really supposed to
+# contain any executable programs, but they sometimes do on older systems.
+# Such programs really belong in libexec.
+
+# Lude depot directories
+/opt/lude/lib
+/usr/lude/lib
+
+# gnu/lib directories
+/opt/gnu/lib
+/usr/local/gnu/lib
+/usr/gnu/lib
+/gnu/lib
+
+# local/lib directories
+/opt/local/lib
+/usr/local/lib
+/local/lib
+
+# Other lib directories
+/usr/pkg/lib
+/usr/lib
+/lib
+
+### General etc directories
+
+# These are nearly last because etc directories are not really supposed to
+# contain any executable programs, but they sometimes do on older systems.
+# Such programs really belong in libexec.
+
+# Lude depot directories
+/opt/lude/etc
+/usr/lude/etc
+
+# gnu/etc directories
+/opt/gnu/etc
+/usr/local/gnu/etc
+/usr/gnu/etc
+/gnu/etc
+
+# local/etc directories
+/opt/local/etc
+/usr/local/etc
+/local/etc
+
+# Other etc directories
+/usr/pkg/etc
+/usr/etc
+/etc
+
+### Games
+
+# These come late in the path because they're not very important.
+
+# Red Hat 6.0 and later put xscreensaver hacks here.
+/usr/X11R6/lib/xscreensaver
+# Fedora Core 4 and later put xscreensaver hacks here
+/usr/libexec/xscreensaver
+
+/opt/games/bin
+/opt/games
+/opt/local/games/bin
+/opt/local/games
+/usr/local/games/bin
+/usr/local/games
+/usr/games/bin
+/usr/games
+
+### Cygwin
+
+/cygdrive/c/windows/system32
+/cygdrive/c/windows
+/cygdrive/c/windows/system32/wbem
+
+/cygdrive/c/winnt/system32
+/cygdrive/c/winnt
+/cygdrive/c/winnt/system32/wbem
+
+# local directories at perforce
+/cygdrive/c/apps/mks/mksnt
+/cygdrive/c/apps/bin
+
+### Mac OSX
+
+/Developer/Tools
+/System/Library/CoreServices
+
+### Last and least
+
+.
+
+# path ends here

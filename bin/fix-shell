@@ -1,0 +1,271 @@
+#!/bin/sh
+# fix-shell --- fix #! path in shell scripts
+# Author: Noah Friedman <friedman@prep.ai.mit.edu>
+# Created: 1991-12-11
+# Last modified: 1993-02-03
+# Public domain
+
+# Commentary:
+
+# Some shell scripts of mine use bash, which unfortunately is not a
+# standard shell on most machines (other than those that will eventually
+# run GNU).  Therefore it's probably necessary to go through each of the
+# scripts in question and replace instances of the #!/bin/bash (or whatever
+# path happens to be there) with whatever it should be.
+#
+# This script can also be used to fix pathnames for scripts using other
+# shells (e.g. rc, tcsh, ksh, etc.) with the `-n' argument to change the
+# name of the shell, or -s argument to specify the path of the shell. 
+# If you use `-s' and the pathname for the shell you specify doesn't exist,
+# then your scripts will simply become broken.  Don't use -s unless you
+# have to, and don't make a mistake. 
+#
+# Note that if a named shell script does not appear to be using the same
+# shell as the one you specified (via either `-n' or `-s' option) then the
+# script will be left alone, because it's assumed that the script wasn't
+# intended to be run with the shell you specified.  The only purpose of
+# this script is to change the path of the shell in question, not the name
+# of the shell itself.  (This is also an advantage because you can say
+# "fix-shell -n foo *" and fix only those scripts using shell foo). 
+#
+# There are some long-option equivalents for the options below.  If you
+# can't read bourne shell script, you're probably better off not using
+# this.
+
+# Code:
+
+progname=`basename $0`
+
+usage="Usage: ${progname} {-c} {-D} {-v} {-n shellname}|{-s shellpath} [script1] {...}
+              {--clobber}
+              {--debug}
+              {--name=shellname}
+              {--shell=shellpath}
+              {--verbose}
+
+Arguments in braces are optional.  Those in brackets are required. 
+
+Please read comments in source file ($0) 
+for more information.
+"
+
+default_shell_name="bash"
+save_orig_files="yes"
+
+# To prevent hairy quoting and escaping later.
+bq="\`"
+eq="'"
+
+# Since we don't have shell functions, this is a kludge that at least
+# reduces some of the redunancy therefore necessary.  Yes, this is evil.
+# Get a shell with functions and you won't have to contemplate this
+# horror.
+#
+# Usage: value="`(set - \"$1\" \"$2\"; eval \"${get_option_argument}\")`"
+#    Long option syntax is `--foo=bar', so 2nd argument `arg' won't get
+#    used if option is long.  
+#
+# Returns number of positions caller should shift.
+# If retval > 2, caller should exit.
+# Only use this if option is supposed to have a mandatory argument. 
+get_option_argument='
+    option="$1";
+    arg="$2";
+
+    # All long options must be at least 3 characters long (--o*), whereas
+    # short options are only two chars (-o) and arguments are separate.
+    option_length="`awk \"END { print length(option); }\" option=\"${option}\" /dev/null`"
+    if [ ${option_length} -ge 3 ]; then
+       # Strip off anything before and including = char
+       arg="`echo ${option} | sed \"s/^[^=]*=//\"`"
+       if [ "z${option}" = "z${arg}" ]; then
+          echo "${progname}: option ${bq}${option}${eq} requires argument." 1>&2
+          echo "${usage}" 1>&2
+          exit 3
+       fi
+       echo "${arg}"
+       exit 1
+    else
+       if [ "z${2}" = "z" ]; then
+          echo "${progname}: option ${bq}${option}${eq} requires argument." 1>&2
+          echo "${usage}" 1>&2
+          exit 3
+       fi
+       echo "${arg}"
+       exit 2
+    fi
+  '
+
+# *sigh* this is annoying.  Some bourne shells don't allow a
+# numeric argument to shift.
+# Usage: 'eval "shift_num=n; ${shift_n_times}"'
+shift_n_times='
+   while [ ${shift_num} -gt 0 ]; do
+      shift_num="`expr ${shift_num} - 1`"
+      shift
+   done;
+  '
+
+# Unset any variables set by options below, if you don't want to take the
+# chance that they may be exported from the environment
+shell_name=""
+shell=""
+verbose=""
+debug=""
+
+# Parse command line arguments. 
+# If you add new options be sure to change the wildcards below to make
+# sure they are unambiguous (i.e. only match one possible long option)
+# Be sure to show at least one instance of the full long option name to
+# document what the long option is canonically called. 
+# Long options which take arguments will need a `*' appended to the
+# canonical name to match the value appended after the `=' character. 
+while [ "$#" != "0" ]; do
+   case z$1 in 
+      z-c | z--clobber | z--c* )
+         save_orig_files=""
+         shift
+        ;;
+      z-D | z--debug | z--d* )
+         debug=t
+         shift
+        ;;
+      z-h | z--help | z--h* )
+         echo "${usage}" 1>&2
+         exit 1
+        ;;
+      z-n | z--name* | z--n* )
+         shell_name="`(set - \"$1\" \"$2\"; eval \"${get_option_argument}\")`"
+         retval=$?
+         if [ ${retval} -gt 2 ]; then
+            # Already printed usage
+            exit 1
+         fi
+         eval "shift_num=${retval}; ${shift_n_times}"
+        ;;
+      z-s | z--shell* | z--s* )
+         shell="`(set - \"$1\" \"$2\"; eval \"${get_option_argument}\")`"
+         retval=$?
+         if [ ${retval} -gt 2 ]; then
+            # Already printed usage
+            exit 1
+         fi
+         eval "shift_num=${retval}; ${shift_n_times}"
+
+         if [ ! "shell_name" ]; then
+            shell_name="`basename ${shell}`"
+         fi
+       ;;
+      z-v | z--verbose | z--v* )
+         verbose="yes"
+         shift
+        ;;
+      z-- )     # Stop option processing
+        shift
+        break
+       ;;
+      z-* )
+        echo "${progname}: unknown option \`$1'" 1>&2
+        echo "${usage}" 1>&2
+        exit 1
+       ;;
+      * )
+        break
+       ;;
+   esac
+done
+
+test "z${debug}" = "zt" && set -x
+
+if [ "$#" = 0 ]; then
+   echo "${usage}" 1>&2
+   exit 1
+fi
+
+if [ ! "${shell_name}" ]; then
+   shell_name="${default_shell_name}"
+fi
+
+# If user didn't specify path of shell on command line, then look for it.
+# We hope that they have the shell in question in their path.
+if [ ! "${shell}" ]; then
+   # Split path into components
+   # This is more reliable than splitting PATH by twiddling IFS, because
+   # this also explicitly puts "." in places there it was implied. 
+   pathlist="`echo ${PATH} | sed 's/^:/.:/;s/::/:.:/g;s/:$/:./;s/:/ /g'`"
+   for try in ${pathlist} ; do
+      if [ -f "${try}/${shell_name}" ]; then
+         shell="${try}/${shell_name}";
+         break
+      fi
+   done
+   if [ ! "${shell}" ]; then
+      echo "${progname}: can't find pathname for shell \`${shell_name}'.  Try using" 1>&2
+      echo "\`-s' option to supply path." 1>&2
+      echo ""
+      echo "${usage}" 1>&2
+      exit 2
+   fi
+fi
+
+if [ "`basename ${shell}`" != ${shell_name} ]; then
+   echo "${progname}'s little mind is blown." 1>&2
+   exit 2
+fi
+
+if [ "${verbose}" ]; then
+   echo "${progname}: path of shell is \`${shell}'" 1>&2
+fi
+
+# Provide regexp-quoted versions for use in sed
+regexp_quote='s/\([][*.\\\/?+|^$]\)/\\\1/g'
+quoted_shell="`echo ${shell} | sed ${regexp_quote}`"
+quoted_shell_name="`echo ${shell_name} | sed ${regexp_quote}`"
+
+for file in "$@" ; do
+   if [ ! -f ${file} ]; then
+      echo "${progname}: \`${file}': cannot open" 1>&2
+      continue
+   fi
+
+   # Not all unix systems have dirname, for some reason. 
+   dirname="`echo ${file} | sed 's/\/[^/]*$//'`"
+   basename="`basename ${file}`"
+
+   if [ ! "${dirname}" -o "${dirname}" = "${basename}" ]; then 
+      dirname="." ; 
+   fi
+
+   cd ${dirname}
+
+   # Do substitution
+   sed "1s/#![ 	]*\/.*\/${quoted_shell_name}/#!${quoted_shell}/" ${basename} > ${basename}.new
+   if cmp -s ${basename} ${basename}.new ; then
+      # files do not differ
+      if [ "${verbose}" ]; then
+         echo "${progname}: file \`${file}' is already configured correctly." 1>&2
+      fi
+      rm -f ${basename}.new
+      continue
+   else
+      # If we should save old file, do so in a way that will save
+      # attributes of the file, including timestamp
+      if [ "${save_orig_files}" ]; then
+         tar -cf - "${basename}" 2> /dev/null | (cd /tmp; tar -xpf - 2> /dev/null)
+         mv /tmp/${basename} ./${basename}.orig
+         if [ "${verbose}" ]; then 
+            echo "${progname}: saved original file in \`${file}.orig'" 1>&2
+         fi
+      fi
+
+      # Dump new script into old file to preserve link count, inode, etc.
+      cat ${basename}.new > ${basename}
+      rm -f ${basename}.new
+
+      if [ "${verbose}" ]; then
+         echo "${progname}: configured \`${file}'" 1>&2
+      fi
+   fi
+done
+
+# fix-shell ends here

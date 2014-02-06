@@ -1,0 +1,15 @@
+#!/bin/sh
+# $Id: xrdb-m4,v 1.1 2011/04/20 18:18:25 friedman Exp $
+
+# Starting with git commit 117021570515fa985670f78d27376d636ed5490f
+# xrdb now calls the preprocessor with -P; but when passed to GNU m4 this
+# prefixes all the builtins with "m4_", which I don't want to depend on
+# since older versions of xrdb won't do this.  So strip out the -P option.
+
+case $1 in
+  -P ) shift ;;
+esac
+
+exec ${M4-m4} "$@"
+
+# eof

@@ -1,0 +1,34 @@
+#! /bin/sh
+# $Id: rxterm,v 1.8 1999/10/15 15:42:11 friedman Exp $
+
+hostname="$1"; shift
+hostnick=`echo "$hostname" | sed -e 's/\..*//'`
+
+case "$DISPLAY" in
+  '' )
+    disp=`getdisplay`
+    case "$disp" in
+      '' ) DISPLAY=`hostname-fqdn`:0.0 ;;
+      *  ) DISPLAY=$disp ;;
+    esac
+    export DISPLAY
+   ;;
+esac
+
+if test ".$DISPLAY" = . ; then
+   DISPLAY="`hostname-fqdn`:0.0";
+   export DISPLAY
+fi
+
+if test -f ${RXTERMRC-$HOME/.rxtermrc} ; then
+  . ${RXTERMRC-$HOME/.rxtermrc}
+fi
+
+xon $XON_OPTIONS -- \
+    "$hostname" xterm -ls -T "$hostnick" -n "$hostnick" ${1+"$@"}
+
+if test $? -ne 0 ; then
+   xterm -ls -T "$hostnick (rlogin)" -n "$hostnick" ${1+"$@"} -e rlogin "$hostname" -8 &
+fi
+
+# rxterm ends here

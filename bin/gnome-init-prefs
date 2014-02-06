@@ -1,0 +1,289 @@
+#!/bin/sh
+# $Id: gnome-init-prefs,v 1.6 2010/02/11 20:58:56 friedman Exp $
+
+# Various gnome preferences I usually want to have.
+# Quick way to initialize everything.
+
+docmd()
+{
+  # Output a copy of the command to be executed with quoting such that it
+  # can be cut/pasted or written to a file for later reexecution.
+  for arg in "$@"; do
+    case $arg in
+      *[][#\ \	]* ) echo -n \""$arg"\" '' ;;
+      *            ) echo -n "$arg"     '' ;;
+    esac
+  done
+  echo
+
+  "$@"
+}
+
+mklist()
+{
+  local IFS=","
+  echo "[$*]"
+}
+
+in_prefkey_root()
+{
+  case $1 in
+    '' | / ) gconf_prefkey_root=   ;;
+    /*     ) gconf_prefkey_root=$1 ;;
+    *      ) gconf_prefkey_root=$gconf_prefkey_root/$1 ;;
+  esac
+}
+
+end_prefkey_root() { gconf_prefkey_root= ; }
+
+pref()
+{
+  key=$1
+  val=$2
+  type=$3
+  list_type=$4
+
+  set x; shift # clear args
+
+  case $key in
+    /* ) : ;;
+    *  ) key=$gconf_prefkey_root/$key ;;
+  esac
+
+  case $val:$type in
+    true: | false: ) type=bool ;;
+    *:             ) type=string ;;
+  esac
+
+  case $type:$list_type in
+    list: ) list_type=string ;;
+  esac
+
+  case $list_type in
+    '' ) : ;;
+    *  ) set x --list-type "$list_type"
+         shift ;;
+  esac
+
+  docmd gconftool-2 --set "$key" "$val" --type "$type" "$@"
+}
+
+##########
+###
+##########
+
+# Human Interface settings
+prefs_hil()
+{
+  in_prefkey_root /desktop/gnome/peripherals/keyboard
+    pref  delay                    250 int
+    pref  rate                      30 int
+
+  in_prefkey_root /desktop/gnome/peripherals/Mouse:Synaptics
+    pref  device_type              touchpad
+    pref  vertical_scrolling       true
+    pref  horizontal_scrolling     true
+
+  in_prefkey_root /desktop/gnome/peripherals/touchpad
+    # Use `synclient' to adjust other parameters.
+    pref  off                      false
+    pref  disable_while_typing     true
+    pref  tap_to_click             false
+    pref  sensitivity                1
+
+    pref  scroll_method              1 # 0: disabled, 1: edge, 2: 2-finger
+    pref  horiz_scroll_enabled     true
+    pref  horiz_scroll_delta       100
+    pref  vert_scroll_delta        100
+
+    pref  max_tap_time               0
+    pref  coast_enable             true
+
+  in_prefkey_root /desktop/gnome/peripherals/mouse
+    pref  motion_acceleration        5
+    pref  motion_threshold          15
+
+    pref  single_click             false
+    pref  double_click             400
+
+    pref  drag_threshold             8
+    pref  cursor_size               18
+    pref  locate_pointer           false
+    pref  left_handed              false
+}
+
+##########
+###
+##########
+
+display_dpi()
+{
+  xdpyinfo 2> /dev/null \
+   | sed -n \
+         -e '/ *resolution: *\([0-9]*x[0-9]*\) dots per inch/!d' \
+         -e 's//\1/p' \
+         -e q
+}
+
+prefs_display()
+{
+  in_prefkey_root /desktop/gnome/background
+    pref  draw_background          false
+    pref  color_shading_type       solid
+    pref  primary_color            "#000000"
+    pref  secondary_color          "#FFFFFF"
+    pref  picture_options          none
+
+  in_prefkey_root /desktop/gnome/file_views
+    pref  icon_theme               Tango
+    pref  show_backup_files        true
+    pref  show_hidden_files        true
+
+
+  in_prefkey_root /desktop/gnome/font_rendering
+    # May want to customize dpi after initializing.
+    # On a 1600x1200 @ 134dpi display, 85 seems preferable.
+    # On a 1400x1050 @ 124dpi display, 100 seems about right.
+    case ${DISPLAY_DPI-`display_dpi`} in
+      13?x* ) dpi=85  ;;
+          * ) dpi=100 ;;
+    esac
+
+    pref  dpi                      $dpi float
+    pref  rgba_order               rgb
+    pref  antialiasing             rgba
+    pref  hinting                  full
+
+
+  in_prefkey_root /desktop/gnome/interface
+    pref  can_change_accels        true
+    pref  file_chooser_backend     gnome-vfs # or "gtk+"
+
+    pref  cursor_blink             false
+    pref  enable_animations        true
+
+    pref  icon_theme               Tango
+    pref  gtk_theme                Clearlooks-Curve
+    pref  gtk_key_theme            Emacs
+
+    pref  menubar_detachable       true
+    pref  menus_have_icons         true
+    pref  menus_have_tearoff       true
+
+    pref  toolbar_detachable       true
+    pref  toolbar_style            both
+    pref  toolbar_icons_size       small-toolbar
+
+    pref  font_name                "DejaVu Sans 10"
+    pref  monospace_font_name      "DejaVu Sans Mono 10"
+    pref  document_font_name       "DejaVu Sans Condensed 10"
+}
+
+##########
+###
+##########
+
+prefs_network()
+{
+  in_prefkey_root /desktop/gnome/url-handlers
+    for proto in chrome ftp gopher http https unknown ; do
+      pref  $proto/needs_terminal  false
+      pref  $proto/enabled         true
+      pref  $proto/command         "firefox %s"
+    done
+
+    pref  mailto/needs_terminal    false
+    pref  mailto/enabled           true
+    pref  mailto/command           "thunderbird -compose %s"
+
+
+  in_prefkey_root /system/http_proxy
+    pref  use_http_proxy           true
+    pref  host                     http-proxy.prv.splode.com
+    pref  port                     80 int
+
+    pref  ignore_hosts             `mklist localhost         \
+                                           127.0.0.0/8       \
+                                           \*.prv.splode.com \
+                                           \*.vpn.splode.com \
+                                           192.168.0.0/16    \
+                                           10.0.0.0/16       \
+                                   ` \
+                                   list string
+
+  in_prefkey_root /system/proxy
+    pref  mode                     manual
+    pref  secure_host              http-proxy.prv.splode.com
+    pref  secure_port              80 int
+}
+
+##########
+###
+##########
+
+prefs_pulseaudio()
+{
+  in_prefkey_root /system/pulseaudio/modules/combine
+    pref  enabled                  true
+    pref  locked                   false
+
+  in_prefkey_root /system/pulseaudio/modules/remote-access
+    pref  enabled                  true
+    pref  anonymous_enabled        true
+    pref  zeroconf_enabled         false
+    pref  locked                   false
+
+  in_prefkey_root /system/pulseaudio/modules/rtp-recv
+    pref  enabled                  true
+    pref  locked                   false
+
+  in_prefkey_root /system/pulseaudio/modules/rtp-send
+    pref  enabled                  true
+    pref  locked                   false
+    pref  loopback_enabled         false
+
+  in_prefkey_root /system/pulseaudio/modules/zeroconf-discover
+    pref  enabled                  true
+    pref  locked                   false
+}
+
+##########
+###
+##########
+
+prefs_misc_apps()
+{
+  pref  /desktop/gnome/applications/help_viewer/exec  gnuedit
+
+  in_prefkey_root /apps/metacity/general
+    pref  titlebar_font           "DejaVu Sans Bold Semi-Condensed 10"
+
+  in_prefkey_root /apps/gnome_settings_daemon/screensaver
+    pref start_screensaver        false
+
+  in_prefkey_root /apps/gnome_settings_daemon/power_manager
+    pref  start_power_manager     false
+
+
+  in_prefkey_root /desktop/pgp
+    pref  encrypt_to_self         true
+    pref  ascii_armor             true
+
+}
+
+##########
+###
+##########
+
+prefs_default()
+{
+  prefs_hil
+  prefs_display
+  prefs_network
+  prefs_pulseaudio
+  prefs_misc_apps
+}
+
+prefs_default
+
+# eof

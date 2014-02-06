@@ -1,0 +1,83 @@
+# $Id: screenrc,v 1.11 2012/02/08 03:23:37 friedman Exp $
+# Use with screen 4.0.2 or later.
+
+multiuser       on
+acladd          noah,noahf,friedman
+#aclchg         * +rwx '?#'
+defwritelock    off
+
+defautonuke     off
+defbce          on
+defc1           on
+defescape       ^^\^
+defflow         off
+deflogin        off
+defmode         0620
+defmonitor      off
+defnonblock     30
+defobuflimit    1024
+defscrollback   1024
+defutf8         on
+defwrap         on
+
+activity        'Activity in window %n (%t) %D %Y-%m-%d %c:%s'
+allpartial      off
+altscreen       off
+autodetach      on
+bell_msg        'Bell in window %n (%t) %D %Y-%m-%d %c:%s'
+caption         splitonly "%3n (%t) %D %Y-%m-%d %c %l %u"
+chdir           ${HOME}
+compacthist     on
+#console        on
+crlf            off
+escape          ^^\^
+hardcopy_append on
+hardcopydir     ${HOME}/tmp
+ignorecase      on
+logfile         ${HOME}/tmp/screenlog.%n
+#height         60
+markkeys        h=^B:l=^F:$=^E
+msgminwait      1
+msgwait         10
+nethack         off
+shelltitle      ''
+startup_message off
+vbell           off
+bell_msg        'VBell in window %n (%t) %D %Y-%m-%d %c:%s'
+vbellwait       1
+#width          80
+zombie          q
+
+# Defeat redhat's xterm title munging.   DO NOT WANT.
+hardstatus ignore
+hardstatus string ""
+
+# Add emacs-style window-splitting bindings (shifted)
+bind ')'        remove
+bind '!'        only
+bind '@'        split
+bind 'O'        focus
+bind '+'        resize +1
+bind '-'        resize -1
+
+# I don't like quit, kill, etc. to be bound to keys that are too easy to
+# press accidentally.  Make myself have to use :-commands.
+bind \\
+bind ^\
+bind d
+bind ^d
+bind K
+bind k
+bind ^k
+bind ^g
+bind ^x
+bind x
+
+term screen-bce-256color
+
+# Enable this by default?  Or require client to use TERM=xterm-256color ?
+# No.  Require attaching clients to use TERM=xterm-256color explicitly
+# and terminals
+#terminfo xterm* Co#256:pa#256:AB=\E[48;5;%dm:AF=\E[38;5;%dm
+
+# screenrc ends here

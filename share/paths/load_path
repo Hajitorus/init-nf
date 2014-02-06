@@ -1,0 +1,13 @@
+# paths/load_path --- directories for shell autoload paths
+# Author: Noah Friedman <friedman@splode.com>
+# Created: 1992-01-13
+# Public domain
+#
+# $Id: load_path,v 1.1 1994/03/14 10:06:29 friedman Exp $
+#
+# These directories should contain files defining functions that are
+# autoloaded.
+#
+$sinit/$shellname/lib
+$HOME/lib/$shellname
+# eof

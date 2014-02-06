@@ -1,0 +1,40 @@
+#!/bin/sh
+# printpath
+# Author: Noah Friedman <friedman@prep.ai.mit.edu>
+# Created: 1992-05-11
+# Last modified: 1993-04-03
+# Public domain
+
+# Commentary:
+
+# Parse {file1 files...}, which is assumed to contain a list of directories
+# separated by whitespace (tabs, spaces, or newlines), and construct a
+# string consisting of those directories separated by delimiter (`:' by
+# default).  Comments in the file (lines beginning with `#') are ignored,
+# but directories and comments cannot exist on the same line.
+
+# Code:
+
+delim=":"
+
+case "z$1" in
+   z-d ) delim="$2"; shift; shift ;;
+esac
+    
+case $# in
+   0 )
+      echo "Usage: printpath {-d delimiter} [file1] {files...}" 1>&2
+      exit 1
+     ;;
+esac
+    
+eval echo \"`sed -ne '
+         /^[	 ]*[#].*/!H;
+         ${x;
+           s/  */'"${delim}"'/g;
+           s/\n\n*/'"${delim}"'/g;
+           s/^://;s/:$//;
+           p;
+          }' ${1+"$@"}`\"
+
+# printpath ends here

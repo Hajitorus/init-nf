@@ -1,0 +1,28 @@
+# terminfodirs --- possible pathnames of termcap files
+# Author: Noah Friedman <friedman@splode.com>
+# Created: 1995-08-25
+# Public domain
+#
+# $Id: terminfodirs,v 1.6 2004/04/28 08:00:08 friedman Exp $
+#
+# When declaring terminal types, these directories are searched to see if
+# they define that terminfo entry.  If so, the TERMINFO environment variable
+# is set appropriately.
+
+$HOME/.terminfo
+$HOME/etc/misc/.terminfo
+
+$HOME/lib/terminfo
+
+$sinit/local/share/terminfo
+$sinit/share/terminfo
+
+/opt/lude/share/terminfo
+/opt/lude/lib/share/terminfo
+/opt/lude/lib/terminfo
+
+/usr/share/terminfo
+/usr/lib/share/terminfo
+/usr/lib/terminfo
+
+# terminfodirs ends here

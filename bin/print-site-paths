@@ -1,0 +1,286 @@
+#!/bin/sh
+# Author: Noah Friedman <friedman@splode.com>
+# Created: 2004-02-10
+# Public domain
+
+# $Id: print-site-paths,v 1.8 2010/03/03 19:45:16 friedman Exp $
+
+# Commentary:
+
+# Generate a list of domain-name based and cpu-model-os pathnames for
+# inclusion in $PATH, for all directory prefixes specified on the command
+# line.
+#
+# These path names are not checked for existence; for that, feed these
+# results through cprintpath.
+
+# Code:
+
+######
+##
+######
+
+domainlist()
+{
+  # The first sed command breaks up any colon-separate domain lists into
+  # multiple lines.
+  #
+  # The second sed command reverses the domain components
+  # (e.g. prv.splode.com -> com.splode.prv) and then prints a list of
+  # successively more top-level domains.
+  #
+  # The third sed command eliminates earlier duplicates, so that e.g. "com"
+  # appears last and only once even if there are multiple .com TLDs listed.
+
+  echo "$*" \
+   | sed -e G \
+         -e :l1 \
+         -e 's/\([ :][ :]*\)\(.*\)\(\n\)$/\3\2\3/' \
+         -e 't l1' \
+   | sed -n \
+         -e '/^$/d' \
+         -e H \
+         -e g \
+         -e 's/$/./' \
+         -e :l1 \
+         -e 's/^\(.*\)\(\n\)\([^.]*\)\./\3.\1\2/' \
+         -e 't l1' \
+         -e 's/\.\n//p' \
+         -e :l2 \
+         -e 's/\.[^.]*$//p' \
+         -e 't l2' \
+         -e 's/.*//' \
+         -e x \
+   | sed -n \
+         -e H \
+         -e '$!d' \
+         -e x \
+         -e :l1 \
+         -e '/\(\n[^\n]*\)\(\n.*\)\1/s//\2\1/' \
+         -e 't l1' \
+         -e 's/^\n//' \
+         -e p
+}
+
+oslist()
+{
+  for _arg in ${1+"$@"}; do echo "$_arg"; done \
+   | sed -n \
+         -e '/^$/d' \
+         -e 's/^[^-]*-//' \
+         -e h \
+         \
+         -e p \
+         -e :l1 \
+         -e 's/\(\.[0-9][0-9]*\)[A-Za-z][A-Za-z]*$/\1/p' \
+         -e 's/\.[0-9][0-9]*$//p' \
+         -e 't l1' \
+         -e 's/[0-9][0-9]*$//p' \
+         -e '/^[^-]*-[^-]*-[^-]*$/s/-[^-]*$//p' \
+         \
+         -e g \
+         -e '/^any-/q' \
+         -e 's/^\([^-][^-]*\)-/any-/' \
+         -e p \
+         -e :l2 \
+         -e 's/\(\.[0-9][0-9]*\)[A-Za-z][A-Za-z]*$/\1/p' \
+         -e 's/\.[0-9][0-9]*$//p' \
+         -e 't l2' \
+         -e 's/[0-9][0-9]*$//p' \
+         -e '/^[^-]*-[^-]*-[^-]*$/s/-[^-]*$//p'
+}
+
+archlist()
+{
+  eval `echo "$machtype" | sed -e 's/^\([^-]*\)-.*/arch=\1/'`
+
+  set fnord; shift
+  case $machtype in
+    x86_64-*     ) set x86    ;;
+    sparc64-*    ) set sparc  ;;
+    alpha[ep]*   ) set alpha  ;;
+    powerpc-*    ) set rs6000 ;;
+
+    ia64-*-hpux* | hppa* )
+      set ia64 hppa2.0w hppa2.0n hppa2.0 hppa1.2 hppa1.1 hppa1.0 hppa
+      for a in ${1+"$@"}; do
+        shift
+        case $a in $arch ) break ;; esac
+      done ;;
+
+    mips64-*   ) set mips   ;;
+    mipsel64-* ) set mipsel ;;
+  esac
+
+  echo $arch ${1+"$@"} noarch
+}
+
+######
+##
+## Permutations:
+##     arch, domain, os
+##     arch, os, domain
+##     domain, arch, os
+##     domain, os, arch
+##     os, arch, domain
+##     os, domain, arch
+##
+## The domainless arch-os directories are always last, after any domain
+## permutation (including those with no arch).  However, they are ordered
+## in the same order as the arch-os directories under the domain
+## directories.
+##
+######
+
+# first, some inner loops
+
+order__arch_os()
+{
+  _dom=
+  case $# in 1 ) _dom=domain/$1/ ;; esac
+
+  for arch in $arch_list; do
+    for os in $os_list; do
+      echo ${prefix}${_dom}arch/$arch-$os
+    done
+  done
+}
+
+order__os_arch()
+{
+  _dom=
+  case $# in 1 ) _dom=domain/$1/ ;; esac
+
+  for os in $os_list; do
+    for arch in $arch_list; do
+      echo ${prefix}${_dom}arch/$arch-$os
+    done
+  done
+}
+
+order___domain()
+{
+  _suffix=
+  case $# in 1 ) _suffix=/arch/$1 ;; esac
+
+  for domain in $domain_list; do
+    echo ${prefix}domain/$domain$_suffix
+  done
+
+}
+
+# now the full shebang
+
+order_arch_domain_os()
+{
+  for arch in $arch_list; do
+    for domain in $domain_list; do
+      for os in $os_list; do
+        echo ${prefix}domain/$domain/arch/$arch-$os
+      done
+    done
+  done
+  order___domain
+  order__arch_os
+}
+
+order_arch_os_domain()
+{
+  for arch in $arch_list; do
+    for os in $os_list; do
+      order___domain $arch-$os
+    done
+  done
+  order___domain
+  order__arch_os
+}
+
+order_domain_arch_os()
+{
+  for domain in $domain_list; do
+    order__arch_os $domain
+    echo ${prefix}domain/$domain
+  done
+  order__arch_os
+}
+
+order_domain_os_arch()
+{
+  for domain in $domain_list; do
+    order__os_arch $domain
+    echo ${prefix}domain/$domain
+  done
+  order__os_arch
+}
+
+order_os_arch_domain()
+{
+  for os in $os_list; do
+    for arch in $arch_list; do
+      order___domain $arch-$os
+    done
+  done
+  order___domain
+  order__os_arch
+}
+
+order_os_domain_arch()
+{
+  for os in $os_list; do
+    for domain in $domain_list; do
+      for arch in $arch_list; do
+        echo ${prefix}domain/$domain/arch/$arch-$os
+      done
+    done
+  done
+  order___domain
+  order__os_arch
+}
+
+######
+##
+######
+
+echo_lines()
+{
+  for x in ${1+"$@"}; do
+    echo "$x"
+  done
+}
+
+main()
+{
+  hostname=${HOSTNAME-`hostname-fqdn`}
+  machtype=${SINIT_MACHTYPE-`hosttype`}
+
+    arch_list=`archlist   $machtype`
+      os_list=`oslist     $machtype`
+  domain_list=`domainlist $hostname $SINITDOMAIN`
+
+  # after careful consideration, this seems the best default
+  order=domain_arch_os
+  sed_order='s/^--[^=]*=//; s/[ ,]/_/g'
+  case $1 in
+    -o|--order ) order=`echo $2 | sed -e "$sed_order"`; shift; shift ;;
+    --order=*  ) order=`echo $1 | sed -e "$sed_order"`; shift ;;
+
+    --arch-list   ) echo_lines $arch_list   ; exit 0 ;;
+    --os-list     ) echo_lines $domain_list ; exit 0 ;;
+    --domain-list ) echo_lines $domain_list ; exit 0 ;;
+  esac
+
+  case $# in 0 ) set "" ;; esac # do we want this?
+
+  for prefix in ${1+"$@"}; do
+    case $prefix in
+      "" ) : ;;
+      *  ) prefix=$prefix/ ;;
+    esac
+
+    order_$order
+  done
+}
+
+main ${1+"$@"}
+
+# eof

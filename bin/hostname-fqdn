@@ -1,0 +1,63 @@
+#!/bin/sh
+# hostname-fqdn --- try to guess fully-qualified hostname
+# Author: Noah Friedman <friedman@splode.com>
+# Created: 1991-12-26
+# Public domain
+
+# $Id: hostname-fqdn,v 1.5 2006/07/20 00:07:50 friedman Exp $
+
+# Commentary:
+
+# This script tries to guarantee that a full host+domain name is given for
+# the current host.  Some admins set the hostname to be unqualified, and
+# may or may not set the domainname to be the rest of the domain--even
+# though it's totally wrong to use domainname for the FQDN; that is the NIS
+# domain name.  It's so wrong that we simply refuse to trust it here.
+
+# Code:
+
+hostname=`hostname`
+
+case $hostname in
+  *.* ) echo $hostname ; exit 0 ;;
+esac
+
+######
+## First try to use system hostent interface to retrieve hostname.
+## This may go through any number of methods according to nsswitch.conf.
+######
+
+if (perl -v > /dev/null) 2> /dev/null; then
+  n=`perl -e '($n) = gethostbyname ($ARGV[0]); print $n;' $hostname`
+  case $n in
+    *.* ) echo $n; exit 0 ;;
+  esac
+fi
+
+######
+## Try to use DNS directly
+######
+
+n=`(host $hostname) 2> /dev/null \
+     | sed -n -e '/^\([^ 	]*\) has address.*/{s//\1/p;q;}'`
+case $n in
+  *.* ) echo $n; exit 0 ;;
+esac
+
+n=`(nslookup $hostname) 2> /dev/null \
+     | sed -n -e '/^Name:[ 	]*/{s///p;q;}'`
+case $n in
+  *.* ) echo $n; exit 0 ;;
+esac
+
+######
+## Try linux-specific hacks last
+######
+
+n=`(dnsdomainname) 2> /dev/null`
+case $n in
+  '(none)' | '' ) echo $hostname;     exit 1 ;;
+  * )             echo $hostname.$n ; exit 0 ;;
+esac
+
+# hostname-fqdn ends here

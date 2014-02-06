@@ -1,0 +1,45 @@
+#!/bin/sh
+
+# $Id: run-ctwm,v 1.1 2005/05/06 13:58:38 friedman Exp $
+# UNFINISHED
+
+CTWMRC=${CTWMRC-"/tmp/ctwmrc$$"}
+
+{
+  cat <<- '__EOF__'
+	divert(-1)
+	pushdef(`cdef',`ifdef(`$1',,`define(`$1',`$2')')')
+	__EOF__
+
+  xrdb -symbols -screen \
+   | sed -e 's/="/=/' \
+         -e 's/"$//' \
+         -e 's/^-D\([^=]*\)/cdef([\1]/' \
+         -e 's/=\(.*\)$/,[\1]/' \
+         -e 's/$/)/' \
+         -e "y/\[]/\\\`'/"
+
+  xdpyinfo -ext XINERAMA 2> /dev/null \
+   | sed -n \
+         -e '$!{/^XINERAMA version/!d;}' \
+         -e :l \
+         -e n \
+         -e 's/[ 	]*//g' \
+         -e '/^head#[0-9]*:\([0-9x]*\)@\([---0-9]*\),\([---0-9]*\)/{' \
+         -e   's//\1+\2+\3/' \
+         -e   H \
+         -e   '$!{b l;}' \
+         -e '}' \
+         -e x \
+         -e 's/+-/-/g' \
+         -e 's/\n/,/g' \
+         -e "s/^,*/cdef(\`XINERAMA_GEOMETRY',\`/" \
+         -e "s/\$/')/" \
+         -e p
+
+  echo "popdef(\`cdef')"
+  echo "divert\`'dnl"
+  #cat $sinit/share/twmrc.m4
+} #> $CTWMRC
+
+# eof

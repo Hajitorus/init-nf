@@ -1,0 +1,72 @@
+# Noah Friedman's <friedman@splode.com> mail aliases
+# in sendmail alias format (see aliases(5)) for use by `sendmail-alias.el'.
+# $Id: aliases,v 1.64 2000/02/07 13:26:37 friedman Exp $
+
+# Generally, this file should only consist of aliases which expand to
+# multiple users.  For personal name equates or addresses which exists
+# merely to provide completion, BBDB should generally be used instead
+# unless specifically overriding BBDB.
+
+### A
+
+# People using agchat.el
+agchat-users: silver@eden.com, jonabbey@eden.com, tarranis@ccwf.cc.utexas.edu
+
+### B
+### C
+### D
+### E
+
+elisp-hackers:	elisp-hackers@gnu.org, jonathan, johng, noel, dmarcher
+
+### F
+### G
+### H
+
+# People who work on homepage.lcs.mit.edu, phil's studly server
+homepage-hackers: philg@mit.edu, cottons@lcs.mit.edu, jsc@arsdigita.com
+
+### I
+### J
+### K
+### L
+### M
+### N
+### O
+### P
+### Q
+### R
+### S
+### T
+
+# People who have sent me feedback about type-break.el
+# type-break-testers:
+#    roland,
+#    rorschach,
+#    mpashton@gnu.org (Mark Ashton),
+#    kgk@zurich.ai.mit.edu (Kleanthes Koniaris),
+#    Fritz.Knabe@ecrc.de,
+#    Chris.Moore@src.bae.co.uk,
+#    mike.morris@src.bae.co.uk,
+#    woodforc@sun.soe.clarkson.edu (Chad Woodford),
+#    quinlan@yggdrasil.com (Daniel Quinlan),
+#    ascott@pcocd2.intel.com (Andy Scott),
+#    robert@steffi.accessone.com (Robert Nicholson)
+
+### U
+### V
+### W
+### X
+### Y
+### Z
+
+### Personal name equates
+
+# The lines below arrange for Emacs to automatically re-build its internal
+# list of mail aliases whenever you save this file.  (idea shamelessly
+# stolen from jimb).
+#
+# Local variables:
+# quote-region-quote: "# "
+# eval: (progn (make-local-variable 'write-file-hooks) (add-hook 'write-file-hooks (function (lambda () (if (boundp 'mail-abbrevs) (setq mail-abbrevs nil) (setq mail-aliases t)) nil))))
+# end:

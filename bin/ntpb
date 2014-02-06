@@ -1,0 +1,537 @@
+#!/usr/bin/perl
+# ntpb --- noah's thinkpad buttons event monitor
+# Author: Noah Friedman <friedman@splode.com>
+# Created: 2010-12-01
+# Public domain
+
+# $Id: ntpb,v 1.5 2011/04/27 10:59:03 friedman Exp $
+
+# Commentary:
+# Code:
+
+use strict;
+use Symbol;
+use Fcntl qw(:DEFAULT :seek);
+use POSIX qw(:sys_wait_h setsid);
+use Getopt::Long;
+use Pod::Usage;
+
+$^W = 1; # enable warnings
+
+# If a config file is specified on the command line, insist on reading it;
+# fail if it can't be found.
+# Otherwise, see if this file exists and only read it if it exists.
+my $default_config = $ENV{NTPBRC} || "$ENV{HOME}/.ntpbrc";
+
+our %option;
+%option
+  = ( config     => undef,
+      poll       => 200000,  # 4/sec
+      nvram      => "/dev/nvram",
+      daemon     => 0,
+
+      osd_cmd    => "osd_cat",
+      osd_font   => "-*-bitstream vera sans-medium-r-*-*-24-*-*-*-*-*-*-*",
+      osd_color  => "green",
+      osd_pos    => "bottom",
+      osd_offset => 100,
+      osd_indent =>  60,
+      osd_delay  =>   3,
+      osd_lines  =>   2,
+      osd_shadow =>   2,
+    );
+
+(my $progname = $0) =~ s=^.*/==;
+
+
+# Read only interesting bytes from nvram to reduce CPU consumption.
+# The kernel driver reads byte-by-byte from nvram, so just reading
+# interesting bytes reduces the number of inb() calls.
+# (But is this cheaper or more expensive than context switching?)
+
+# pairs of [offset, length]
+my @nvram_extent = (#[0x39, 0x01],  # not currently used
+                    [0x57, 0x03],   # [0x56, 0x04] if checking A/S model keys
+                    [0x5e, 0x01],
+                    [0x60, 0x01]);
+my $nvram_beg = $nvram_extent[0]->[0];
+my $nvram_end = (  $nvram_extent[$#nvram_extent]->[0]
+                 + $nvram_extent[$#nvram_extent]->[1]);
+my $nvram_len = $nvram_end - $nvram_beg;
+my $nvram_fh;
+my $nvram_buf;
+
+sub nvram_data
+{
+  unless ($nvram_fh)
+    {
+      my $nvram_dev = $option{nvram};
+      $nvram_fh = gensym;
+      die "sysopen: $nvram_dev: $!"
+        unless sysopen ($nvram_fh, $nvram_dev, O_RDONLY);
+    }
+
+  # Read only interesting bytes from nvram to reduce CPU consumption.
+  # The kernel driver reads byte-by-byte from nvram, so just reading
+  # interesting bytes reduces the number of inb() calls.
+  #
+  # If the nvram area we care about is less than 12 contiguous bytes, just
+  # read that entire range at once to reduce the total number of system calls;
+  # context switching cost surely overtakes inb() very quickly.
+  if ($nvram_len < 12) # skipping A/S model bytes
+    {
+      sysseek ($nvram_fh, $nvram_beg, SEEK_SET);
+      sysread ($nvram_fh, $nvram_buf, $nvram_len, $nvram_beg);
+    }
+  else
+    {
+      map { sysseek ($nvram_fh, $_->[0], SEEK_SET);
+            sysread ($nvram_fh, $nvram_buf, $_->[1], $_->[0]);
+          } @nvram_extent;
+    }
+  #_nvram_print ($nvram_buf);
+  return $nvram_buf;
+}
+
+# for debugging
+sub _nvram_print
+{
+  my $buf = shift;
+  my @s;
+  map { push @s, sprintf ("[%02x]", $_->[0]);
+        push @s, map { sprintf "%02x", $_;
+                     } unpack ("C*", substr ($buf, $_->[0], $_->[1]));
+      } @nvram_extent;
+  print join (" ", @s), "\n";
+}
+
+sub usleep
+{
+  select (undef, undef, undef, $_[0] / 1000000);
+}
+
+# elts are nvram_byte, nvram_mask, nvram_rshift, nvram_invertp
+my %event_map =
+  ( #home       => [0x56, 0x01, 0]
+    #search     => [0x56, 0x02, 1],
+    #mail       => [0x56, 0x04, 2],
+    #wireless   => [0x56, 0x20, 5],
+    thinkpad    => [0x57, 0x08, 3],
+    zoom        => [0x57, 0x20, 5, 1],
+    #display    => [0x57, 0x40, 6],
+    #hibernate  => [0x58, 0x01, 0],
+    thinklight  => [0x58, 0x10, 4],
+    #expand     => [0x59, 0x10, 4],
+    brightness  => [0x5E, 0x20, 5],
+    volume      => [0x60, 0x80, 7],
+    mute        => [0x60, 0x40, 6],
+  );
+
+sub thinkpad_decode
+{
+  my $new = shift;
+  my $old = shift || {};
+  my @nvram = unpack ("C*", $new);
+  my %new;
+
+  map { my ($off, $mask, $rshift, $invertp) = @{$event_map{$_}};
+
+        my $nvbit = ($invertp ? ~$nvram[$off] : $nvram[$off]) & $mask;
+        $nvbit >>= $rshift if $rshift;
+        $new{$_} = (($old->{$_} || 0) & ~0x01) | $nvbit;
+      } keys %event_map;
+
+  $new{brightness_level}  =  $nvram[0x5E] & 0x07;
+  $new{volume_level}      =  $nvram[0x60] & 0x0f;
+
+  # These are handled by ACPI lately.
+  #$new{powermgt_ac}      =  $nvram[0x39] & 0x07;
+  #$new{powermgt_battery} = ($nvram[0x39] & 0x38) >> 3;
+  #$new{display_state}    =  $nvram[0x59] & 0x03;
+
+  return \%new;
+}
+
+
+my %tpb_pct_max = ( brightness => 7, volume => 14 );
+
+our %tpb_callback;
+%tpb_callback =
+  ( #display    => undef,
+    #hibernate  => undef,
+
+    #home       => \&tpb_callback_generic_pressed,
+    #search     => \&tpb_callback_generic_pressed,
+    #mail       => \&tpb_callback_generic_pressed,
+    #wireless   => \&tpb_callback_generic_pressed,
+    thinkpad    => \&tpb_callback_thinkpad_pressed,
+
+    #expand     => \&tpb_callback_generic_toggle,
+    zoom        => \&tpb_callback_generic_toggle,
+    thinklight  => undef, # \&tpb_callback_generic_toggle,
+
+    brightness  => \&tpb_callback_generic_percent,
+
+    mute        => \&tpb_callback_mute_toggle,
+    volume      => \&tpb_callback_volume_percent,
+  );
+
+sub tpb_callback_generic_pressed
+{
+  my ($event, $state) = @_;
+  osd_notify (sprintf ("%s pressed", ucfirst ($event)));
+}
+
+sub tpb_callback_generic_toggle
+{
+  my ($event, $state) = @_;
+  my $msg = sprintf ("%s %s", ucfirst ($event),
+                     ($state->{$event} ? "ON" : "OFF"));
+  osd_notify ($msg);
+}
+
+sub tpb_callback_generic_percent
+{
+  my ($event, $state) = @_;
+  my $max = $tpb_pct_max{$event} || 100;
+  my $pct = int (100 * $state->{$event . "_level"} / $max);
+  my $text = sprintf ("%s %d%%", ucfirst ($event), $pct);
+  osd_pct ($pct, $text);
+}
+
+####
+
+sub tpb_callback_display_volume
+{
+  my ($event, $state, $mute_toggled) = @_;
+
+  my $max = $tpb_pct_max{volume} || 100;
+  my $pct = int (100 * $state->{volume_level} / $max);
+
+  my $text = sprintf ("Volume %d%%", $pct);
+  if ($mute_toggled)
+    {
+      $text .= sprintf (" [Mute %s]", $state->{mute} ? "ON" : "OFF");
+    }
+  elsif ($state->{mute})
+    {
+      $text .= " [Mute ON already]";
+    }
+  $pct = 0 if $state->{mute};
+  osd_pct ($pct, $text);
+}
+
+sub tpb_callback_mute_toggle
+{
+  my ($event, $state) = @_;
+  $state->{tpb_callback_mute_toggled} = 1;
+  tpb_callback_display_volume (@_, 1);
+}
+
+sub tpb_callback_volume_percent
+{
+  my ($event, $state) = @_;
+  return if defined $state->{tpb_callback_mute_toggled};
+  tpb_callback_display_volume (@_);
+}
+
+sub tpb_callback_thinkpad_pressed
+{
+  my ($event, $state) = @_;
+  #spawn (qw(xterm -T ntpctl -e ntpctl));
+  #spawn (qw(xterm -geometry 160x34 -e alsamixer));
+  spawn (qw(pavucontrol));
+}
+
+
+sub event_poll_loop
+{
+  my ($option) = @_;
+  my $poll = $option{poll};
+
+  $SIG{CHLD} = \&osd_wait;
+
+  my ($oldnv,    $newnv) = ("", "");
+  my ($oldstate, $newstate);
+  while (1)
+    {
+      $oldnv = $newnv;
+      $newnv = nvram_data();
+
+      if ($newnv ne $oldnv)
+        {
+          $newstate = thinkpad_decode ($newnv, $oldstate);
+
+          for my $event (sort keys %event_map)
+            {
+              last unless $oldstate;
+              next if $newstate->{$event} == $oldstate->{$event};
+
+              my $callback = $tpb_callback{$event};
+              next unless $callback;
+              &$callback ($event, $newstate);
+            }
+          $oldstate = $newstate;
+        }
+      usleep ($poll);
+    }
+}
+
+
+sub mkpipe
+{
+  my     ($rfh, $wfh) = (gensym, gensym);
+  pipe   ($rfh, $wfh);
+  return ($rfh, $wfh);
+}
+
+# Fork process into the background
+sub spawn
+{
+  exec (@_) if fork == 0;
+}
+
+sub set_proctitle
+{
+  my $newstr = join (" ", @_);
+
+  my $len = scalar @ARGV;
+  map { $len += length $_ } ($^X, $0, @ARGV);
+  substr ($0, 0, $len) = "\0" x $len;
+  substr ($0, 0, length $newstr) = $newstr;
+}
+
+sub daemonize
+{
+  close (STDIN);
+  close (STDOUT);
+  close (STDERR);
+  open (STDIN,  "</dev/null");
+  open (STDOUT, ">/dev/null");
+  open (STDERR, ">/dev/null");
+
+  exit (0) if (fork != 0);
+  setsid ();
+}
+
+sub dmi
+{
+  my ($name) = @_;
+  my $dmi = "/sys/class/dmi/id";
+
+  my $fh = gensym;
+  die unless open ($fh, "< $dmi/$name");
+  local $_ = <$fh>;
+  close ($fh);
+  chomp $_;
+  return $_;
+}
+
+
+my $prev_pid;
+sub osd_wait
+{
+  while (1)
+    {
+      my $result = waitpid (-1, &WNOHANG);
+      last if $result == 0;
+
+      if (defined $prev_pid && $result == $prev_pid)
+        {
+          undef $prev_pid;
+          last;
+        }
+      last if $result < 0;
+    }
+}
+
+# Fork a subprocess to introduce a small delay between the time the kill
+# was issued and the time the signal is actually sent.
+# This is so that pushing buttons rapidly in succession will avoid making
+# the OSD flash because the new osd process hasn't had time to display
+# before the old process is killed.
+sub osd_kill
+{
+  my $pid = shift;
+  if (fork == 0)
+    {
+      usleep (150000);
+      kill (15, $pid);
+      exit (0);
+    }
+}
+
+my @osd_cmd;
+sub osd_cmd
+{
+  return @osd_cmd if @osd_cmd;
+
+  while (my ($opt, $val) = each %option)
+    {
+      next unless $opt =~ /^osd_/;
+
+      if ($opt eq "osd_cmd")
+        {
+          unshift @osd_cmd, $val;
+          next;
+        }
+
+      (my $flag = $opt) =~ s/^osd_/--/;
+      push @osd_cmd, $flag, $val;
+    }
+  return @osd_cmd;
+}
+
+sub osd_cat
+{
+  my $text = shift;
+
+  my @cmd = osd_cmd();
+  push @cmd, @_;
+
+  my @pipe = mkpipe() if $text;
+
+  osd_kill ($prev_pid) if defined $prev_pid;
+
+  my $pid = fork;
+  if ($pid == 0)
+    {
+      if (@pipe)
+        {
+          open (STDIN, "<&" . fileno ($pipe[0]));
+          map { close $_ } @pipe;
+        }
+      exec (@cmd);
+    }
+  elsif (@pipe)
+    {
+      my $fh = $pipe[1];
+      print $fh $text, "\n";
+      map { close $_ } @pipe;
+    }
+
+  $prev_pid = $pid;
+}
+
+sub osd_notify
+{
+  osd_cat ($_[0]);
+}
+
+sub osd_pct
+{
+  my ($pct, $text) = @_;
+
+  my @cmd = (qw(--barmode      percentage
+                --percentage), $pct,
+             qw(--text),       $text);
+  osd_cat (undef, @cmd);
+}
+
+
+sub parse_options
+{
+  return unless @_ && ref $_[0] eq 'ARRAY';
+
+  my $help = -1;
+  my $optarg = sub { $option{$_[0]} = $_[1] };
+
+  local *ARGV = \@{$_[0]}; # modify our local arglist, not real ARGV.
+  my $parser = Getopt::Long::Parser->new;
+  $parser->configure (qw(autoabbrev bundling pass_through));
+  $parser->getoptions ("h|help|usage+"  => \$help,
+                       "config|c=s"     => $optarg);
+
+  pod2usage (-exitstatus => 0, -verbose => $help) if $help >= 0;
+
+  {
+    local @INC = ($ENV{HOME}, "$ENV{HOME}/etc/misc");
+    local $@ = "";
+    if    ($option{config})    { eval { require $option{config} } }
+    elsif (-f $default_config) { eval { require $default_config } }
+    die "$@" unless ($@ eq '' || $@ =~ /did not return a true value at/);
+  }
+
+  $parser->configure (qw(autoabbrev bundling no_pass_through));
+  my $succ = $parser->getoptions
+    ( "poll|p=i"     => $optarg,
+      "nvram=s"      => $optarg,
+      "daemon|d"     => $optarg,
+
+      "osd_cmd=s"    => $optarg,
+      "osd_font=s"   => $optarg,
+      "osd_color=s"  => $optarg,
+      "osd_pos=i"    => $optarg,
+      "osd_offset=i" => $optarg,
+      "osd_indent=i" => $optarg,
+      "osd_delay=i"  => $optarg,
+      "osd_lines=i"  => $optarg,
+      "osd_shadow=i" => $optarg,
+    );
+  exit (1) unless $succ;
+}
+
+sub main
+{
+  parse_options ([@_]);
+  #set_proctitle ($progname, @_);
+  daemonize() if ($option{daemon});
+
+  my $product_version = dmi ("product_version");
+  # Some of these are handled by ACPI on newer models
+  if ($product_version =~ /W70\d/i)
+    { map { delete $event_map{$_} } qw(brightness thinkpad volume mute) }
+  elsif ($product_version =~ /T60/i)
+    { map { delete $event_map{$_} } qw(brightness thinkpad) }
+  event_poll_loop ();
+}
+
+main (@ARGV);
+
+__END__
+
+=head1 NAME
+
+ntpb - noah's thinkpad buttons
+
+=head1 SYNOPSIS
+
+ ntpb {-h|--help}                   {--osd_cmd      PROGRAM}
+      {-d|--daemon}                 {--osd_font     FONTs}
+      {-c|--config    NTPBRC}       {--osd_color    COLOR}
+      {-p|--poll      USEC}         {--osd_pos      top|bottom|center}
+      {--nvram        NVRAMDEV}     {--osd_offset   PIXELS}
+                                    {--osd_indent   PIXELS}
+                                    {--osd_delay    DELAY}
+                                    {--osd_lines    LINES}
+                                    {--osd_shadow   SHADOWLINES}
+
+ The -h option may be repeated up to 3 times for increased verbosity.
+
+=head1 OPTIONS
+
+=over 8
+
+=item B<-h>, B<--help>
+
+Usage information.
+May be repeated 1-3 times for more verbosity.
+
+=item The rest to be documented later.
+
+=back
+
+=head1 DESCRIPTION
+
+Launch programs or display status using On-Screen display (OSD) when
+ThinkPad-specific buttons are pressed.
+
+This is based loosely on the `tpb' program, but instead of writing a
+separate callback script, just do everything via one file.
+
+Unlike `tpb', this program doesn't monitor X events or APM.  There are so
+many better ways to do that already, and this program should be becoming
+rapidly more obsolescent as these features become supported directly by
+ACPI, hal, etc.
+
+=cut

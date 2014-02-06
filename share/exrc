@@ -1,0 +1,27 @@
+set autoindent
+set showmatch
+set noremap
+set ts=9
+set sw=255
+set wm=10
+map  h
+map  j
+map  k
+map  l
+map  0
+map  $
+map b b
+map f w
+map  
+map v 
+map  d$
+map  X
+map  bdw
+map  :n 
+map s :w
+map  B
+map c :q
+map  O
+map > G0
+map g G0
+map  mcOa----+----1----+----2----+----3----+----4----+----5----+----6----+----7----+----8`c

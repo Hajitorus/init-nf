@@ -1,0 +1,1283 @@
+# termcap --- terminal capability description database
+# Maintainer: Noah Friedman <friedman@splode.com>
+# Created: 1991-11-22
+
+# $Id: termcap.src,v 1.15 2006/03/11 20:23:20 friedman Exp $
+
+# Commentary:
+
+# These are occasionally modified versions of termcap entries I originally
+# obtained from the ncurses termcap database, x.org xterm sources, and/or
+# various GPLed programs (e.g. `screen').
+
+# To break termcap entries into one capability per line:
+#    (query-replace-regexp "\\([^\t]\\):\\([^\\\\\n]\\)" "\\1:\\\\\n\t:\\2")
+# To consolidate termcap entries into one line (some termcap libs crash on
+# longer entries otherwise; some overflow condition):
+#    (query-replace-regexp ":\\\\\n\t:" ":")
+
+# Code:
+
+
+# xterm (X Window System) entries
+
+# termcap format is limited to 1023 characters.  This set of descriptions
+# is a subset of the terminfo, since not all features can be fit into that
+# limit.  The 'xterm' description supports color.  The monochrome 'xtermm'
+# drops color in favor of additional function keys.  If you need both, use
+# terminfo.
+#
+# The 1023-character limit applies to each entry after resolving the "tc="
+# strings.  Some implementations may discount all or part of the formatting
+# characters in the entry (i.e., the backslash newline tab colon).  GNU
+# termcap does not have this limit.
+#
+# I checked the limits using ncurses "captoinfo -CrTUvx", which prints the
+# resolved length of each entry in a comment at the end - T.Dickey
+
+xf|xterm-new|xorg/xf86 (dickey) xterm:\
+	:*6=\EOF:\
+	:@7=\EOF:\
+	:F1=\E[23~:\
+	:F2=\E[24~:\
+	:k1=\EOP:\
+	:k2=\EOQ:\
+	:k3=\EOR:\
+	:k4=\EOS:\
+	:k5=\E[15~:\
+	:k6=\E[17~:\
+	:k7=\E[18~:\
+	:k8=\E[19~:\
+	:k9=\E[20~:\
+	:k;=\E[21~:\
+	:kd=\EOB:\
+	:kH=\EOF:\
+	:kh=\EOH:\
+	:kI=\E[2~:\
+	:kl=\EOD:\
+	:Km=\E[M:\
+	:kN=\E[6~:\
+	:kP=\E[5~:\
+	:kr=\EOC:\
+	:ku=\EOA:\
+	:tc=xterm-basic:
+
+# This chunk is used for building the VT220/Sun/PC keyboard variants.
+xb|xterm-basic|modern xterm common:\
+	:am:\
+	:bs:\
+	:km:\
+	:mi:\
+	:ms:\
+	:ut:\
+	:xn:\
+	:AX:\
+	:Co#8:\
+	:co#80:\
+	:kn#12:\
+	:li#24:\
+	:pa#64:\
+	:AB=\E[4%dm:\
+	:AF=\E[3%dm:\
+	:AL=\E[%dL:\
+	:DC=\E[%dP:\
+	:DL=\E[%dM:\
+	:DO=\E[%dB:\
+	:LE=\E[%dD:\
+	:RI=\E[%dC:\
+	:UP=\E[%dA:\
+	:ae=\E(B:\
+	:al=\E[L:\
+	:as=\E(0:\
+	:bl=^G:\
+	:cd=\E[J:\
+	:ce=\E[K:\
+	:cl=\E[H\E[2J:\
+	:cm=\E[%i%d;%dH:\
+	:cs=\E[%i%d;%dr:\
+	:ct=\E[3g:\
+	:dc=\E[P:\
+	:dl=\E[M:\
+	:ei=\E[4l:\
+	:ho=\E[H:\
+	:im=\E[4h:\
+	:is=\E[!p\E[?3;4l\E[4l\E>:\
+	:kD=\E[3~:\
+	:kb=^H:\
+	:ke=\E[?1l\E>:\
+	:ks=\E[?1h\E=:\
+	:le=^H:\
+	:md=\E[1m:\
+	:me=\E[m\E(B:\
+	:ml=\El:\
+	:mr=\E[7m:\
+	:mu=\Em:\
+	:nd=\E[C:\
+	:op=\E[39;49m:\
+	:rc=\E8:\
+	:rs=\E[!p\E[?3;4l\E[4l\E>:\
+	:sc=\E7:\
+	:se=\E[27m:\
+	:sf=^J:\
+	:so=\E[7m:\
+	:sr=\EM:\
+	:st=\EH:\
+	:te=\E[?1049l:\
+	:ti=\E[?1049h:\
+	:ue=\E[24m:\
+	:up=\E[A:\
+	:us=\E[4m:\
+	:ve=\E[?25h:\
+	:vi=\E[?25l:
+
+# These aliases are for compatibility with the terminfo; termcap cannot provide
+# the extra features such as color initialization, but termcap applications
+# still want the names.  Note that AF/AB really should be Sf/Sb, but there are
+# applications which expect the former.  The terminfo contains both strings.
+x1|xterm-16color|xterm alias:\
+	:tc=xterm-new:
+
+x2|xterm-88color|xterm alias:\
+	:Co#88:\
+	:pa#7744:\
+	:tc=xterm-256color:
+
+x3|xterm-256color|xterm alias:\
+	:Co#256:\
+	:pa#32767:\
+	:AB=\E[48;5;%dm:\
+	:AF=\E[38;5;%dm:\
+	:tc=xterm-new:
+
+# The xterm-new description has all of the features, but is not completely
+# compatible with vt220.  If you are using a Sun or PC keyboard, set the
+# sunKeyboard resource to true:
+#	+ maps the editing keypad
+#	+ interprets control-function-key as a second array of keys, so a
+#	  12-fkey keyboard can support vt220's 20-fkeys.
+#	+ maps numeric keypad "+" to ",".
+#	+ uses DEC-style control sequences for the application keypad.
+vt|xterm-vt220|xterm emulating vt220:\
+	:*6=\E[4~:\
+	:@7=\E[4~:\
+	:Km=\E[M:\
+	:kH=\E[4~:\
+	:kh=\E[1~:\
+	:tc=xterm-basic:
+
+vm|xterm-mono|monochrome xterm:\
+	:ut@:\
+	:Co@:\
+	:NC@:\
+	:kn#20:\
+	:pa@:\
+	:AB@:\
+	:AF@:\
+	:Sb@:\
+	:Sf@:\
+	:op@:\
+	:st@:\
+	:tc=xterm:
+
+# This should work for the commonly used "color xterm" variations (XFree86
+# xterm, color_xterm, nxterm, rxvt).  Note that it does not set 'bce', so for
+# XFree86 and rxvt, some applications that use colors will be less efficient,
+# and in a few special cases (with "smart" optimization) the wrong color will
+# be painted in spots.
+vc|xterm-color|generic "ANSI" color xterm:\
+	:Co#8:\
+	:NC@:\
+	:pa#64:\
+	:AB=\E[4%dm:\
+	:AF=\E[3%dm:\
+	:ac=:\
+	:op=\E[m:\
+	:tc=xterm-r6:
+
+# An 8-bit description is doable with termcap, but there are probably no
+# termcap (or BSD curses) applications that are able to use it.
+x8|xterm-8bit|xterm terminal emulator 8-bit controls (X Window System):\
+	:am:\
+	:km:\
+	:mi:\
+	:ms:\
+	:xn:\
+	:co#80:\
+	:it#8:\
+	:li#24:\
+	:AL=\233%dL:\
+	:DC=\233%dP:\
+	:DL=\233%dM:\
+	:DO=\233%dB:\
+	:IC=\233%d@:\
+	:Km=\233M:\
+	:LE=\233%dD:\
+	:RI=\233%dC:\
+	:UP=\233%dA:\
+	:ae=\E(B:\
+	:al=\233L:\
+	:as=\E(0:\
+	:bl=^G:\
+	:bt=\233Z:\
+	:cd=\233J:\
+	:ce=\233K:\
+	:cl=\233H\2332J:\
+	:cm=\233%i%d;%dH:\
+	:cr=^M:\
+	:cs=\233%i%d;%dr:\
+	:ct=\2333g:\
+	:dc=\233P:\
+	:dl=\233M:\
+	:do=^J:\
+	:ei=\2334l:\
+	:ho=\233H:\
+	:im=\2334h:\
+	:is=\E[62"p\E G\233m\233?7h\E>\E7\233?1;3;4;6l\2334l\233r\E8:\
+	:k1=\23311~:\
+	:k2=\23312~:\
+	:k3=\23313~:\
+	:k4=\23314~:\
+	:k5=\23315~:\
+	:k6=\23317~:\
+	:k7=\23318~:\
+	:k8=\23319~:\
+	:k9=\23320~:\
+	:kD=\2333~:\
+	:kI=\2332~:\
+	:kN=\2336~:\
+	:kP=\2335~:\
+	:kb=^H:\
+	:kd=\217B:\
+	:ke=\233?1l\E>:\
+	:kh=\2331~:\
+	:kl=\217D:\
+	:kr=\217C:\
+	:ks=\233?1h\E=:\
+	:ku=\217A:\
+	:le=^H:\
+	:mb=\2335m:\
+	:md=\2331m:\
+	:me=\233m\E(B:\
+	:mr=\2337m:\
+	:nd=\233C:\
+	:rc=\E8:\
+	:sc=\E7:\
+	:se=\23327m:\
+	:sf=^J:\
+	:so=\2337m:\
+	:sr=\215:\
+	:st=\210:\
+	:ta=^I:\
+	:te=\233?1049l:\
+	:ti=\233?1049h:\
+	:ue=\23324m:\
+	:up=\233A:\
+	:us=\2334m:\
+	:vb=\233?5h\233?5l:\
+	:ve=\233?25h:\
+	:vi=\233?25l:
+
+xs|xterm-sun|xterm with Sun functionkeys:\
+	:%1=\E[196z:\
+	:&8=\E[195z:\
+	:@0=\E[200z:\
+	:@5=\E[197z:\
+	:@7=\E[220z:\
+	:F1=\E[192z:\
+	:F2=\E[193z:\
+	:Km=\E[M:\
+	:k1=\E[224z:\
+	:k2=\E[225z:\
+	:k3=\E[226z:\
+	:k4=\E[227z:\
+	:k5=\E[228z:\
+	:k6=\E[229z:\
+	:k7=\E[230z:\
+	:k8=\E[231z:\
+	:k9=\E[232z:\
+	:k;=\E[233z:\
+	:kD=\177:\
+	:kI=\E[2z:\
+	:kN=\E[222z:\
+	:kP=\E[216z:\
+	:kh=\E[214z:\
+	:tc=xterm-basic:
+
+# Compatible with the X11R6.3 xterm
+r6|xterm-r6|xterm-old|X11R6 xterm:\
+	:am:\
+	:bs:\
+	:km:\
+	:mi:\
+	:ms:\
+	:pt:\
+	:xn:\
+	:co#80:\
+	:kn#20:\
+	:li#24:\
+	:*6=\E[4~:\
+	:@0=\E[1~:\
+	:@7=\E[4~:\
+	:AL=\E[%dL:\
+	:DC=\E[%dP:\
+	:DL=\E[%dM:\
+	:DO=\E[%dB:\
+	:F1=\E[23~:\
+	:F2=\E[24~:\
+	:F3=\E[25~:\
+	:F4=\E[26~:\
+	:F5=\E[28~:\
+	:F6=\E[29~:\
+	:F7=\E[31~:\
+	:F8=\E[32~:\
+	:F9=\E[33~:\
+	:FA=\E[34~:\
+	:LE=\E[%dD:\
+	:RI=\E[%dC:\
+	:UP=\E[%dA:\
+	:ae=^O:\
+	:al=\E[L:\
+	:as=^N:\
+	:bl=^G:\
+	:cd=\E[J:\
+	:ce=\E[K:\
+	:cl=\E[H\E[2J:\
+	:cm=\E[%i%d;%dH:\
+	:cs=\E[%i%d;%dr:\
+	:ct=\E[3g:\
+	:dc=\E[P:\
+	:dl=\E[M:\
+	:eA=\E)0:\
+	:ei=\E[4l:\
+	:ho=\E[H:\
+	:im=\E[4h:\
+	:is=\E[m\E[?7h\E[4l\E>\E7\E[r\E[?1;3;4;6l\E8:\
+	:k1=\E[11~:\
+	:k2=\E[12~:\
+	:k3=\E[13~:\
+	:k4=\E[14~:\
+	:k5=\E[15~:\
+	:k6=\E[17~:\
+	:k7=\E[18~:\
+	:k8=\E[19~:\
+	:k9=\E[20~:\
+	:k;=\E[21~:\
+	:kD=\177:\
+	:kI=\E[2~:\
+	:kN=\E[6~:\
+	:kP=\E[5~:\
+	:kb=^H:\
+	:kd=\EOB:\
+	:ke=\E[?1l\E>:\
+	:kh=\E[1~:\
+	:kl=\EOD:\
+	:kr=\EOC:\
+	:ks=\E[?1h\E=:\
+	:ku=\EOA:\
+	:md=\E[1m:\
+	:me=\E[m:\
+	:ml=\El:\
+	:mr=\E[7m:\
+	:mu=\Em:\
+	:nd=\E[C:\
+	:rc=\E8:\
+	:rs=\E[m\E[?7h\E[4l\E>\E7\E[r\E[?1;3;4;6l\E8:\
+	:sc=\E7:\
+	:se=\E[m:\
+	:sf=^J:\
+	:so=\E[7m:\
+	:sr=\EM:\
+	:te=\E[2J\E[?47l\E8:\
+	:ti=\E7\E[?47h:\
+	:ue=\E[m:\
+	:up=\E[A:\
+	:us=\E[4m:
+
+# Compatible with the R5 xterm
+r5|xterm-r5|X11R5 xterm X11R5:\
+	:am:\
+	:bs:\
+	:km:\
+	:mi:\
+	:ms:\
+	:pt:\
+	:xn:\
+	:co#80:\
+	:kn#4:\
+	:li#24:\
+	:@7=\E[4~:\
+	:AL=\E[%dL:\
+	:DC=\E[%dP:\
+	:DL=\E[%dM:\
+	:DO=\E[%dB:\
+	:IC=\E[%d@:\
+	:UP=\E[%dA:\
+	:al=\E[L:\
+	:cd=\E[J:\
+	:ce=\E[K:\
+	:cl=\E[H\E[2J:\
+	:cm=\E[%i%d;%dH:\
+	:cs=\E[%i%d;%dr:\
+	:ct=\E[3g:\
+	:dc=\E[P:\
+	:dl=\E[M:\
+	:ei=\E[4l:\
+	:ho=\E[H:\
+	:im=\E[4h:\
+	:is=\E[r\E[m\E[2J\E[H\E[?7h\E[?1;3;4;6l\E[4l:\
+	:k1=\E[11~:\
+	:k2=\E[12~:\
+	:k3=\E[13~:\
+	:k4=\E[14~:\
+	:kb=^H:\
+	:kd=\EOB:\
+	:ke=\E[?1l\E>:\
+	:kh=\E[1~:\
+	:kl=\EOD:\
+	:kr=\EOC:\
+	:ks=\E[?1h\E=:\
+	:ku=\EOA:\
+	:md=\E[1m:\
+	:me=\E[m:\
+	:mr=\E[7m:\
+	:nd=\E[C:\
+	:rc=\E8:\
+	:rs=\E>\E[?1;3;4;5;6l\E[4l\E[?7h\E[m\E[r\E[2J\E[H:\
+	:sc=\E7:\
+	:se=\E[m:\
+	:sf=^J:\
+	:so=\E[7m:\
+	:sr=\EM:\
+	:te=\E[2J\E[?47l\E8:\
+	:ti=\E7\E[?47h:\
+	:ue=\E[m:\
+	:up=\E[A:\
+	:us=\E[4m:
+
+# Customization begins here.
+x0|xterm-xfree86|xterm terminal emulator (XFree86):\
+	:tc=xterm-new:
+
+# This is the only entry which you should have to customize, since "xterm"
+# is widely used for a variety of incompatible terminal emulations including
+# color_xterm and rxvt.
+v0|xterm|X11 terminal emulator:\
+	:tc=xterm-new:
+#	:tc=xterm-r6:
+
+
+# Screen
+
+SC|screen-unk|VT 100/ANSI X3.64 virtual terminal:\
+	:am:\
+	:xn:\
+	:ms:\
+	:mi:\
+	:G0:\
+	:km:\
+	:DO=\E[%dB:\
+	:LE=\E[%dD:\
+	:RI=\E[%dC:\
+	:UP=\E[%dA:\
+	:bs:\
+	:bt=\E[Z:\
+	:cb=\E[1K:\
+	:cd=\E[J:\
+	:ce=\E[K:\
+	:cl=\E[H\E[J:\
+	:cm=\E[%i%d;%dH:\
+	:ct=\E[3g:\
+	:do=^J:\
+	:nd=\E[C:\
+	:pt:\
+	:rc=\E8:\
+	:rs=\Ec:\
+	:sc=\E7:\
+	:st=\EH:\
+	:up=\EM:\
+	:le=^H:\
+	:bl=^G:\
+	:cr=^M:\
+	:it#8:\
+	:ho=\E[H:\
+	:nw=\EE:\
+	:ta=^I:\
+	:is=\E)0:\
+	:li#24:\
+	:co#80:\
+	:us=\E[4m:\
+	:ue=\E[24m:\
+	:so=\E[3m:\
+	:se=\E[23m:\
+	:mb=\E[5m:\
+	:md=\E[1m:\
+	:mr=\E[7m:\
+	:me=\E[m:\
+	:sr=\EM:\
+	:al=\E[L:\
+	:AL=\E[%dL:\
+	:dl=\E[M:\
+	:DL=\E[%dM:\
+	:cs=\E[%i%d;%dr:\
+	:dc=\E[P:\
+	:DC=\E[%dP:\
+	:im=\E[4h:\
+	:ei=\E[4l:\
+	:IC=\E[%d@:\
+	:ks=\E[?1h\E=:\
+	:ke=\E[?1l\E>:\
+	:vb=\Eg:\
+	:ku=\EOA:\
+	:kd=\EOB:\
+	:kr=\EOC:\
+	:kl=\EOD:\
+	:k1=\EOP:\
+	:k2=\EOQ:\
+	:k3=\EOR:\
+	:k4=\EOS:\
+	:k5=\E[15~:\
+	:k6=\E[17~:\
+	:k7=\E[18~:\
+	:k8=\E[19~:\
+	:k9=\E[20~:\
+	:k;=\E[21~:\
+	:F1=\E[23~:\
+	:F2=\E[24~:\
+	:kh=\E[1~:\
+	:kI=\E[2~:\
+	:kD=\E[3~:\
+	:kH=\E[4~:\
+	:@7=\E[4~:\
+	:kP=\E[5~:\
+	:kN=\E[6~:\
+	:eA=\E(B\E)0:\
+	:as=^N:\
+	:ae=^O:\
+	:ti=\E[?1049h:\
+	:te=\E[?1049l:\
+	:vi=\E[?25l:\
+	:ve=\E[34h\E[?25h:\
+	:vs=\E[34l:\
+	:Co#8:\
+	:pa#64:\
+	:AF=\E[3%dm:\
+	:AB=\E[4%dm:\
+	:op=\E[39;49m:\
+	:AX:\
+	:ac=``aaffggjjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}}~~..--++,,hhII00:
+
+S1|screen:\
+	:ti@:\
+	:te@:\
+	:tc=screen-unk:
+
+SB|screen-bce|VT 100/ANSI X3.64 virtual terminal with bce:\
+	:ut:\
+	:tc=screen:
+
+SH|screen-s|VT 100/ANSI X3.64 virtual terminal with hardstatus line:\
+	:ts=\E_:\
+	:fs=\E\\:\
+	:ds=\E_\E\\:\
+	:tc=screen:
+
+screen-256color:\
+	:Co#256:\
+	:pa#32767:\
+	:AF=\E[38;5;%dm:\
+	:AB=\E[48;5;%dm:\
+	:tc=screen:
+
+screen-bce-256color:\
+	:Co#256:\
+	:pa#32767:\
+	:AF=\E[38;5;%dm:\
+	:AB=\E[48;5;%dm:\
+	:tc=screen-bce:
+
+screen-s-256color:\
+	:Co#256:\
+	:pa#32767:\
+	:AF=\E[38;5;%dm:\
+	:AB=\E[48;5;%dm:\
+	:tc=screen-s:
+
+screen-88color:\
+	:Co#88:\
+	:pa#7744:\
+	:AF=\E[38;5;%dm:\
+	:AB=\E[48;5;%dm:\
+	:tc=screen:
+
+screen-bce-88color:\
+	:Co#88:\
+	:pa#7744:\
+	:AF=\E[38;5;%dm:\
+	:AB=\E[48;5;%dm:\
+	:tc=screen-bce:
+
+screen-s-88color:\
+	:Co#88:\
+	:pa#7744:\
+	:AF=\E[38;5;%dm:\
+	:AB=\E[48;5;%dm:\
+	:tc=screen-s:
+
+
+#### Ann Arbor (aa)
+#
+# Ann Arbor made dream terminals for hackers -- large screen sizes and huge
+# numbers of function keys.  At least some used monitors in portrait mode,
+# allowing up to 76-character screen heights!  They were reachable at:
+#
+#	Ann Arbor Terminals
+#	6175 Jackson Road
+#	Ann Arbor, MI 48103
+#	(313)-663-8000
+#
+# But in 1996 the phone number reaches some kitschy retail shop, and Ann Arbor
+# can't be found on the Web; I fear they're long dead.  R.I.P.
+#
+
+
+# Originally from Mike O'Brien@Rand and Howard Katseff at Bell Labs.
+# Highly modified 6/22 by Mike O'Brien.
+# split out into several for the various screen sizes by dave-yost@rand
+# Modifications made 3/82 by Mark Horton
+# Modified by Tom Quarles at UCB for greater efficiency and more diversity
+# status line moved to top of screen, :vb: removed 5/82
+# Some unknown person at SCO then hacked the init strings to make them more
+# efficient.
+#
+# assumes the following setup:
+#   A menu: 0000 1010  0001 0000
+#   B menu: 9600  0100 1000  0000 0000  1000 0000  17  19
+#   C menu: 56   66   0    0    9600  0110 1100
+#   D menu: 0110 1001   1   0
+#
+#	Briefly, the settings are for the following modes:
+#	   (values are for bit set/clear with * indicating our preference
+#	    and the value used to test these termcaps)
+#	Note that many of these settings are irrelevent to the terminfo
+#	and are just set to the default mode of the terminal as shipped
+#	by the factory.
+#
+# A menu: 0000 1010  0001 0000
+#	Block/underline cursor*
+#	blinking/nonblinking cursor*
+#	key click/no key click*
+#	bell/no bell at column 72*
+#
+#	key pad is cursor control*/key pad is numeric
+#	return and line feed/return for :cr: key *
+#	repeat after .5 sec*/no repeat
+#	repeat at 25/15 chars per sec. *
+#
+#	hold data until pause pressed/process data unless pause pressed*
+#	slow scroll/no slow scroll*
+#	Hold in area/don't hold in area*
+#	functions keys have default*/function keys disabled on powerup
+#
+#	show/don't show position of cursor during page transmit*
+#	unused
+#	unused
+#	unused
+#
+# B menu: 9600  0100 1000  0000 0000  1000 0000  17  19
+#	Baud rate (9600*)
+#
+#	2 bits of parity - 00=odd,01=even*,10=space,11=mark
+#	1 stop bit*/2 stop bits
+#	parity error detection off*/on
+#
+#	keyboard local/on line*
+#	half/full duplex*
+#	disable/do not disable keyboard after data transmission*
+#
+#	transmit entire page/stop transmission at cursor*
+#	transfer/do not transfer protected characters*
+#	transmit all characters/transmit only selected characters*
+#	transmit all selected areas/transmit only 1 selected area*
+#
+#	transmit/do not transmit line separators to host*
+#	transmit/do not transmit page tab stops tabs to host*
+#	transmit/do not transmit column tab stop tabs to host*
+#	transmit/do not transmit graphics control (underline,inverse..)*
+#
+#	enable*/disable auto XON/XOFF control
+#	require/do not require receipt of a DC1 from host after each LF*
+#	pause key acts as a meta key/pause key is pause*
+#	unused
+#
+#	unused
+#	unused
+#	unused
+#	unused
+#
+#	XON character (17*)
+#	XOFF character (19*)
+#
+# C menu: 56   66   0    0    9600  0110 1100
+#	number of lines to print data on (printer) (56*)
+#
+#	number of lines on a sheet of paper (printer) (66*)
+#
+#	left margin (printer) (0*)
+#
+#	number of pad chars on new line to printer (0*)
+#
+#	printer baud rate (9600*)
+#
+#	printer parity: 00=odd,01=even*,10=space,11=mark
+#	printer stop bits: 2*/1
+#	print/do not print guarded areas*
+#
+#	new line is: 01=LF,10=CR,11=CRLF*
+#	unused
+#	unused
+#
+# D menu: 0110 1001   1   0
+#	LF is newline/LF is down one line, same column*
+#	wrap to preceding line if move left from col 1*/don't wrap
+#	wrap to next line if move right from col 80*/don't wrap
+#	backspace is/is not destructive*
+#
+#	display*/ignore DEL character
+#	display will not/will scroll*
+#	page/column tab stops*
+#	erase everything*/erase unprotected only
+#
+#	editing extent: 0=display,1=line*,2=field,3=area
+#
+#	unused
+#
+
+annarbor4080|aa4080|ann arbor 4080:\
+	:am:\
+	:bs:\
+	:co#80:\
+	:li#40:\
+	:bl=^G:\
+	:cl=\014:\
+	:cr=^M:\
+	:ct=^^P^P:\
+	:do=^J:\
+	:ho=^K:\
+	:kb=^^:\
+	:kd=^J:\
+	:kh=^K:\
+	:kl=^H:\
+	:kr=^_:\
+	:ku=^N:\
+	:le=^H:\
+	:nd=^_:\
+	:sf=^J:\
+	:st=^]^P1:\
+	:ta=^I:\
+	:up=^N:
+
+# Strange Ann Arbor terminal from BRL
+aas1901|Ann Arbor K4080 w/S1901 mod:\
+	:am:\
+	:co#80:\
+	:li#40:\
+	:bl=^G:\
+	:cl=^L:\
+	:cr=^M:\
+	:do=^J:\
+	:ho=^K:\
+	:kb=^H:\
+	:kd=^J:\
+	:kl=^H:\
+	:le=^H:\
+	:ll=^O\0c:\
+	:nd=^_:\
+	:nw=^M^J:\
+	:sf=^J:\
+	:ta=^I:\
+	:up=^N:
+
+# If you're using the GNU termcap library, add
+#	:cS=\E[%p1%d;%p2%d;%p3%d;%p4%dp:
+# to these capabilities.  This is the nonstandard GNU termcap scrolling
+# capability, arguments are:
+#   1. Total number of lines on the screen.
+#   2. Number of lines above desired scroll region.
+#   3. Number of lines below (outside of) desired scroll region.
+#   4. Total number of lines on the screen, the same as the first parameter.
+# The generic Ann Arbor entry is the only one that uses this.
+# (sgr removed to fit entry within 1023 bytes)
+# (terminfo-only capabilities suppressed to fit entry within 1023 bytes)
+aaa+unk|aaa-unk|ann arbor ambassador (internal - don't use this directly):\
+	:am:\
+	:bs:\
+	:km:\
+	:mi:\
+	:xo:\
+	:co#80:\
+	:it#8:\
+	:AL=\E[%dL:\
+	:DC=\E[%dP:\
+	:DL=\E[%dM:\
+	:DO=\E[%dB:\
+	:IC=\E[%d@:\
+	:LE=\E[%dD:\
+	:RI=\E[%dC:\
+	:UP=\E[%dA:\
+	:al=\E[L:\
+	:bl=^G:\
+	:bt=\E[Z:\
+	:cd=\E[J:\
+	:ce=\E[K:\
+	:cl=\E[H\E[J:\
+	:cm=\E[%i%d;%dH:\
+	:cr=^M:\
+	:ct=\E[2g:\
+	:dc=\E[P:\
+	:dl=\E[M:\
+	:do=^K:\
+	:ei=:\
+	:ho=\E[H:\
+	:i1=\E[m\E7\E[H\E9\E8:\
+	:i2=\E[1Q\E[>20;30l\EP`+x~M\E\\:\
+	:ic=\E[@:\
+	:im=:\
+	:k1=\EOA:\
+	:k2=\EOB:\
+	:k3=\EOC:\
+	:k4=\EOD:\
+	:k5=\EOE:\
+	:k6=\EOF:\
+	:k7=\EOG:\
+	:k8=\EOH:\
+	:k9=\EOI:\
+	:kD=\E[P:\
+	:kI=\E[@:\
+	:kb=^H:\
+	:kd=\E[B:\
+	:ke=\EP`>y~[[J`8xy~[[A`4xy~[[D`6xy~[[C`2xy~[[B\E\\:\
+	:kh=\E[H:\
+	:kl=\E[D:\
+	:kr=\E[C:\
+	:ks=\EP`>z~[[J`8xz~[[A`4xz~[[D`6xz~[[C`2xz~[[B\E\\:\
+	:ku=\E[A:\
+	:le=^H:\
+	:mb=\E[5m:\
+	:md=\E[1m:\
+	:me=\E[m:\
+	:mm=\E[>52h:\
+	:mo=\E[>52l:\
+	:mr=\E[7m:\
+	:nd=\E[C:\
+	:rc=\E8:\
+	:sc=\E7:\
+	:se=\E[m:\
+	:sf=^K:\
+	:so=\E[7m:\
+	:st=\EH:\
+	:ta=^I:\
+	:ue=\E[m:\
+	:up=\E[A:\
+	:us=\E[4m:
+
+aaa-noah-unk|ann arbor ambassador (internal) - noah's hacks:\
+	:bw:\
+        :bl=:\
+	:cS=\E[%d;%d;%d;%dp:\
+	:ch=\E[%i%d`:\
+	:mk=\E[7;8m:\
+	:nl=^J:\
+	:nw=\EE:\
+	:pt:\
+	:sr=\EM:\
+	:vb=:
+
+aaa+rv|ann arbor ambassador in reverse video:\
+	:i1=\E[7m\E7\E[H\E9\E8:\
+	:mb=\E[5;7m:\
+	:md=\E[1;7m:\
+	:me=\E[7m\016:\
+	:mk=\E[7;8m:\
+	:mr=\E[m:\
+	:r1=\E[H\E[7m\E[J:\
+	:se=\E[7m:\
+	:so=\E[m:\
+	:ue=\E[7m:\
+	:us=\E[4;7m:
+
+# Ambassador with the DEC option, for partial vt100 compatibility.
+aaa+dec|ann arbor ambassador in dec vt100 mode:\
+	:ac=aaffggjjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}}:\
+	:ae=^N:\
+	:as=^O:\
+	:cs=\E[%i%d;%dr:\
+	:eA=\E(0:
+
+aaa-18|ann arbor ambassador/18 lines:\
+	:li#18:\
+	:is=\E7\E[60;0;0;18p\E8:\
+	:te=\E[60;0;0;18p\E[60;1H\E[K:\
+	:ti=\E[18;0;0;18p:\
+	:tc=aaa+unk:
+
+aaa-18-rv|ann arbor ambassador/18 lines+reverse video:\
+	:tc=aaa+rv:\
+	:tc=aaa-18:
+
+aaa-20|ann arbor ambassador/20 lines:\
+	:li#20:\
+	:is=\E7\E[60;0;0;20p\E8:\
+	:te=\E[60;0;0;20p\E[60;1H\E[K:\
+	:ti=\E[20;0;0;20p:\
+	:tc=aaa+unk:
+
+aaa-22|ann arbor ambassador/22 lines:\
+	:li#22:\
+	:is=\E7\E[60;0;0;22p\E8:\
+	:te=\E[60;0;0;22p\E[60;1H\E[K:\
+	:ti=\E[22;0;0;22p:\
+	:tc=aaa+unk:
+
+aaa-24|ann arbor ambassador/24 lines:\
+	:li#24:\
+	:is=\E7\E[60;0;0;24p\E8:\
+	:te=\E[60;0;0;24p\E[60;1H\E[K:\
+	:ti=\E[24;0;0;24p:\
+	:tc=aaa+unk:
+
+aaa-24-rv|ann arbor ambassador/24 lines+reverse video:\
+	:tc=aaa+rv:\
+	:tc=aaa-24:
+
+aaa-26|ann arbor ambassador/26 lines:\
+	:li#26:\
+	:is=\E7\E[60;0;0;26p\E8:\
+	:te=\E[60;0;0;26p\E[26;1H\E[K:\
+	:ti=\E[H\E[J\E[26;0;0;26p:\
+	:tc=aaa+unk:
+
+aaa-28|ann arbor ambassador/28 lines:\
+	:li#28:\
+	:is=\E7\E[60;0;0;28p\E8:\
+	:te=\E[60;0;0;28p\E[28;1H\E[K:\
+	:ti=\E[H\E[J\E[28;0;0;28p:\
+	:tc=aaa+unk:
+
+aaa-30-s|aaa-s|ann arbor ambassador/30 lines w/status:\
+	:es:\
+	:hs:\
+	:li#29:\
+	:ds=\E7\E[60;0;0;30p\E[1;1H\E[K\E[H\E8\r\n\E[K:\
+	:fs=\E[>51l:\
+	:is=\r\n\E[A\E7\E[60;1;0;30p\E8:\
+	:te=\E[60;1;0;30p\E[29;1H\E[K:\
+	:ti=\E[H\E[J\E[30;1;0;30p\E[30;1H\E[K:\
+	:ts=\E[>51h\E[1;%dH\E[2K:\
+	:tc=aaa+unk:
+
+aaa-30-s-rv|aaa-s-rv|ann arbor ambassador/30 lines+status+reverse video:\
+	:tc=aaa+rv:\
+	:tc=aaa-30-s:
+
+aaa-s-ctxt|aaa-30-s-ctxt|ann arbor ambassador/30 lines+status+save context:\
+	:te=\E[60;1;0;30p\E[59;1H\E[K:\
+	:ti=\E[30;1H\E[K\E[30;1;0;30p:\
+	:tc=aaa-30-s:
+
+aaa-s-rv-ctxt|aaa-30-s-rv-ct|ann arbor ambassador/30 lines+status+save context+reverse video:\
+	:te=\E[60;1;0;30p\E[59;1H\E[K:\
+	:ti=\E[30;1H\E[K\E[30;1;0;30p:\
+	:tc=aaa-30-s-rv:
+
+aaa|aaa-30|ambas|ambassador|ann arbor ambassador/30 lines:\
+	:li#30:\
+	:is=\E7\E[60;0;0;30p\E8:\
+	:te=\E[60;0;0;30p\E[30;1H\E[K:\
+	:ti=\E[H\E[J\E[30;0;0;30p:\
+	:tc=aaa+unk:
+
+aaa-30-rv|aaa-rv|ann arbor ambassador/30 lines in reverse video:\
+	:tc=aaa+rv:\
+	:tc=aaa-30:
+
+aaa-30-ctxt|aaa-ctxt|ann arbor ambassador/30 lines; saving context:\
+	:te=\E[60;0;0;30p\E[60;1H\E[K:\
+	:ti=\E[30;0;0;30p:\
+	:tc=aaa-30:
+
+aaa-30-rv-ctxt|aaa-rv-ctxt|ann arbor ambassador/30 lines reverse video; saving context:\
+	:te=\E[60;0;0;30p\E[60;1H\E[K:\
+	:ti=\E[30;0;0;30p:\
+	:tc=aaa+rv:\
+	:tc=aaa-30:
+
+aaa-36|ann arbor ambassador/36 lines:\
+	:li#36:\
+	:is=\E7\E[60;0;0;36p\E8:\
+	:te=\E[60;0;0;36p\E[36;1H\E[K:\
+	:ti=\E[H\E[J\E[36;0;0;36p:\
+	:tc=aaa+unk:
+
+aaa-36-rv|ann arbor ambassador/36 lines+reverse video:\
+	:tc=aaa+rv:\
+	:tc=aaa-36:
+
+aaa-40|ann arbor ambassador/40 lines:\
+	:li#40:\
+	:is=\E7\E[60;0;0;40p\E8:\
+	:te=\E[60;0;0;40p\E[40;1H\E[K:\
+	:ti=\E[H\E[J\E[40;0;0;40p:\
+	:tc=aaa+unk:
+
+aaa-40-rv|ann arbor ambassador/40 lines+reverse video:\
+	:tc=aaa+rv:\
+	:tc=aaa-40:
+
+aaa-48|ann arbor ambassador/48 lines:\
+	:li#48:\
+	:is=\E7\E[60;0;0;48p\E8:\
+	:te=\E[60;0;0;48p\E[48;1H\E[K:\
+	:ti=\E[H\E[J\E[48;0;0;48p:\
+	:tc=aaa+unk:
+
+aaa-48-rv|ann arbor ambassador/48 lines+reverse video:\
+	:tc=aaa+rv:\
+	:tc=aaa-48:
+
+aaa-60-s|ann arbor ambassador/59 lines+status:\
+	:es:\
+	:hs:\
+	:li#59:\
+	:ds=\E7\E[60;0;0;60p\E[1;1H\E[K\E[H\E8\r\n\E[K:\
+	:fs=\E[>51l:\
+	:is=\r\n\E[A\E7\E[60;1;0;60p\E8:\
+	:ts=\E[>51h\E[1;%dH\E[2K:\
+	:tc=aaa+unk:
+
+aaa-60-s-rv|ann arbor ambassador/59 lines+status+reverse video:\
+	:tc=aaa+rv:\
+	:tc=aaa-60-s:
+
+aaa-60-dec-rv|ann arbor ambassador/dec mode+59 lines+status+rev video:\
+	:tc=aaa+dec:\
+	:tc=aaa+rv:\
+	:tc=aaa-60-s:
+
+aaa-60|ann arbor ambassador/60 lines:\
+	:li#60:\
+	:is=\E7\E[60;0;0;60p\E[1Q\E[m\E[>20;30l\E8:\
+	:tc=aaa+unk:
+
+aaa-60-rv|ann arbor ambassador/60 lines+reverse video:\
+	:tc=aaa+rv:\
+	:tc=aaa-60:
+
+aaa-db|ann arbor ambassador 30/destructive backspace:\
+	:bs@:\
+	:i2=\E[1Q\E[m\E[>20l\E[>30h:\
+	:le=\E[D:\
+	:tc=aaa-30:
+
+guru|guru-33|guru+unk|ann arbor guru/33 lines 80 cols:\
+	:li#33:\
+	:i2=\E[>59l:\
+	:is=\E7\E[255;0;0;33;80;80p\E8\E[J:\
+	:te=\E[255p\E[255;1H\E[K:\
+	:ti=\E[33p:\
+	:vb=\E[>59h\E[>59l:\
+	:tc=aaa+unk:
+
+guru+rv|guru changes for reverse video:\
+	:i2=\E[>59h:\
+	:vb=\E[>59l\E[>59h:
+
+guru-rv|guru-33-rv|ann arbor guru/33 lines+reverse video:\
+	:tc=guru+rv:\
+	:tc=guru-33:
+
+guru+s|guru status line:\
+	:es:\
+	:hs:\
+	:ds=\E7\E[;0p\E[1;1H\E[K\E[H\E8\r\n\E[K:\
+	:fs=\E[>51l:\
+	:te=\E[255;1p\E[255;1H\E[K:\
+	:ti=:\
+	:ts=\E[>51h\E[1;%dH\E[2K:
+
+guru-nctxt|guru with no saved context:\
+	:ti=\E[H\E[J\E[33p\E[255;1H\E[K:\
+	:tc=guru:
+
+guru-s|guru-33-s|ann arbor guru/33 lines+status:\
+	:li#32:\
+	:is=\r\n\E[A\E7\E[255;1;0;33;80;80p\E8\E[J:\
+	:ti=\E[33;1p\E[255;1H\E[K:\
+	:tc=guru+s:\
+	:tc=guru+unk:
+
+guru-24|ann arbor guru 24 lines:\
+	:co#80:\
+	:li#24:\
+	:is=\E7\E[255;0;0;24;80;80p\E8\E[J:\
+	:ti=\E[24p:\
+	:tc=guru+unk:
+
+guru-44|ann arbor guru 44 lines:\
+	:co#97:\
+	:li#44:\
+	:is=\E7\E[255;0;0;44;97;100p\E8\E[J:\
+	:ti=\E[44p:\
+	:tc=guru+unk:
+
+guru-44-s|ann arbor guru/44 lines+status:\
+	:li#43:\
+	:is=\r\n\E[A\E7\E[255;1;0;44;80;80p\E8\E[J:\
+	:ti=\E[44;1p\E[255;1H\E[K:\
+	:tc=guru+s:\
+	:tc=guru+unk:
+
+guru-76|guru with 76 lines by 89 cols:\
+	:co#89:\
+	:li#76:\
+	:is=\E7\E[255;0;0;76;89;100p\E8\E[J:\
+	:ti=\E[76p:\
+	:tc=guru+unk:
+
+guru-76-s|ann arbor guru/76 lines+status:\
+	:co#89:\
+	:li#75:\
+	:is=\r\n\E[A\E7\E[255;1;0;76;89;100p\E8\E[J:\
+	:ti=\E[76;1p\E[255;1H\E[K:\
+	:tc=guru+s:\
+	:tc=guru+unk:
+
+guru-76-lp|guru-lp|guru with page bigger than line printer:\
+	:co#134:\
+	:li#76:\
+	:is=\E7\E[255;0;0;76;134;134p\E8\E[J:\
+	:ti=\E[76p:\
+	:tc=guru+unk:
+
+guru-76-w|guru 76 lines by 178 cols:\
+	:co#178:\
+	:li#76:\
+	:is=\E7\E[255;0;0;76;178;178p\E8\E[J:\
+	:ti=\E[76p:\
+	:tc=guru+unk:
+
+guru-76-w-s|ann arbor guru/76 lines+status+wide:\
+	:co#178:\
+	:li#75:\
+	:is=\r\n\E[A\E7\E[255;1;0;76;178;178p\E8\E[J:\
+	:ti=\E[76;1p\E[255;1H\E[K:\
+	:tc=guru+s:\
+	:tc=guru+unk:
+
+guru-76-wm|guru 76 lines by 178 cols with 255 cols memory:\
+	:co#178:\
+	:li#76:\
+	:is=\E7\E[255;0;0;76;178;255p\E8\E[J:\
+	:ti=\E[76p:\
+	:tc=guru+unk:
+
+aaa-rv-unk|ann arbor unknown type:\
+	:Nl#0:\
+	:lh#0:\
+	:lw#0:\
+	:ho=\E[H:\
+	:i1=\E[7m\E7\E[H\E9\E8:\
+	:mb=\E[5;7m:\
+	:md=\E[1;7m:\
+	:me=\E[7m:\
+	:mk=\E[7;8m:\
+	:mr=\E[m:\
+	:r1=\E[H\E[7m\E[J:\
+	:se=\E[7m:\
+	:so=\E[m:\
+	:ue=\E[7m:\
+	:us=\E[4;7m:
+
+# Emacs terminals
+
+# 2005-11-27 taken from emacs/lisp/term.el CVS sources for emacs 22.
+# Corresponding terminfo entry lives in termcap.src in this directory.
+eterm-color|Emacs term.el terminal emulator term-protocol-version 0.96:\
+	:li#24:\
+	:co#80:\
+	:cl=\E[H\E[J:\
+	:cd=\E[J:\
+	:bs:\
+	:am:\
+	:xn:\
+	:cm=\E[%i%d;%dH:\
+	:nd=\E[C:\
+	:up=\E[A:\
+	:ce=\E[K:\
+	:ho=\E[H:\
+	:pt:\
+	:al=\E[L:\
+	:dl=\E[M:\
+	:DL=\E[%dM:\
+	:AL=\E[%dL:\
+	:cs=\E[%i%d;%dr:\
+	:sf=^J:\
+	:dc=\E[P:\
+	:DC=\E[%dP:\
+	:IC=\E[%d@:\
+	:im=\E[4h:\
+	:ei=\E[4l:\
+	:mi:\
+	::so=\E[7m:\
+	:se=\E[m:\
+	:us=\E[4m:\
+	:ue=\E[m:\
+	:md=\E[1m:\
+	:mr=\E[7m:\
+	:me=\E[m:\
+	:UP=\E[%dA:\
+	:DO=\E[%dB:\
+	:LE=\E[%dD:\
+	:RI=\E[%dC:\
+	:kl=\EOD:\
+	:kd=\EOB:\
+	:kr=\EOC:\
+	:ku=\EOA:\
+	:kN=\E[6~:\
+	:kP=\E[5~:\
+	:@7=\E[4~:\
+	:kh=\E[1~:\
+	:mk=\E[8m:\
+	:cb=\E[1K:\
+	:op=\E[39;49m:\
+	:Co#8:\
+	:pa#64:\
+	:AB=\E[4%dm:\
+	:AF=\E[3%dm:\
+	:cr=^M:\
+	:bl=^G:\
+	:do=^J:\
+	:le=^H:\
+	:ta=^I:\
+	:se=\E[27m:\
+	:ue=\E24m:\
+	:kb=^?:\
+	:kD=^[[3~:\
+	:sc=\E7:\
+	:rc=\E8:\
+	:r1=\Ec:
+# -undefine ic
+# don't define :te=\E[2J\E[?47l\E8:ti=\E7\E[?47h\
+
+a0|emacs|adm3|dumb|un|unknown:\
+	:am:\
+	:bl=^G:\
+	:cl=:\
+	:cm=:\
+	:co#80:\
+	:cr=^M:\
+	:do=^J:\
+	:li#24:\
+	:sf=^J:\
+	:up=:
+
+# termcap ends here

@@ -1,0 +1,176 @@
+# paths/manpath --- directories to go in man page path
+# Author: Noah Friedman <friedman@prep.ai.mit.edu>
+# Created: 1991-07-28
+# Public domain
+#
+# $Id: manpath,v 1.16 2002/06/17 06:23:44 friedman Exp $
+#
+# It is possible to use environment variables and subshell commands (stuff
+# in `...`) to get the desired path.  See the examples here.
+#
+# Lines beginning with a '#' are comments.  It's not possible to put
+# comments on the same line as a pathname component.
+
+### Personal
+
+$HOME/lib/man
+
+### Netscape Communications Corp.
+
+/tools/ns/man
+/tools/contrib/man
+/.secure/man
+
+# Lude depot
+
+/opt/lude/man
+/opt/lude/share/man
+
+### GNU
+
+/opt/gnu/man
+/opt/gnu/share/man
+
+/usr/local/gnu/man
+/usr/local/gnu/share/man
+
+/usr/gnu/man
+/usr/gnu/share/man
+
+/gnu/man
+/gnu/share/man
+
+### local
+
+/opt/local/man
+/opt/local/share/man
+
+/usr/local/man
+/usr/local/share/man
+
+/local/man
+/local/share/man
+
+/usr/site/man
+/usr/site/share/man
+
+/usr/pkg/man
+/usr/man
+/usr/share/man
+
+### Package man pages
+
+# TeX
+/opt/tex/man
+/opt/local/tex/man
+/usr/local/gnu/tex/man
+/usr/local/tex/man
+/usr/tex/man
+/usr/TeX/man
+
+/usr/local/kerberos/man
+
+# netpbm image conversion utilities
+/opt/netpbm/man
+/usr/local/netpbm/man
+
+# pbmplus image conversion utilities
+/opt/pbmplus/man
+/usr/local/pbmplus/man
+
+# LISP
+/opt/lisp/man
+/usr/local/lisp/man
+
+# Java
+/opt/java/man
+/usr/local/java/man
+/usr/java/man
+
+# LDAP (Lightweight Directory Access Protocol)
+/opt/ldap/man
+/usr/local/ldap/man
+
+# GIMP (Gnu Image Manipulation Program)
+/opt/gimp/man
+/usr/local/gimp/man
+
+# Mozilla
+/opt/netscape/man
+/usr/local/netscape/man
+
+# HP printer tools
+/opt/hpnp/man
+/usr/local/hpnp/man
+
+### X11 man pages
+
+/opt/X11/man
+/opt/local/X11/man
+/usr/local/X11/man
+/usr/X11/man
+
+/opt/X11R6.3/man
+/opt/local/X11R6.3/man
+/usr/local/X11R6.3/man
+/usr/X11R6.3/man
+
+/opt/X11R6.1/man
+/opt/local/X11R6.1/man
+/usr/local/X11R6.1/man
+/usr/X11R6.1/man
+
+/opt/X11R6/man
+/opt/local/X11R6/man
+/usr/local/X11R6/man
+/usr/X11R6/man
+
+/opt/X11R5/man
+/opt/local/X11R5/man
+/usr/local/X11R5/man
+/usr/X11R5/man
+
+/opt/X11R4/man
+/opt/local/X11R4/man
+/usr/local/X11R4/man
+/usr/X11R4/man
+
+/usr/openwin/man
+/usr/dt/man
+
+/opt/Motif*/man
+/usr/local/Motif*/man
+
+/opt/ncd/man
+/usr/local/ncd/man
+
+# Old versions of XFree86 on early netbsd and linux systems.
+/usr/X386/man
+/usr/XFree86/man
+
+### Solaris 2.x and other SVR4 systems
+
+/opt/RICHPse/man
+/opt/SUNWdiag/man
+/opt/SUNWspro/man
+/opt/SUNWspci/man
+/opt/SUNWwabi/man
+/opt/TWWfsw/man
+/usr/opt/SUNWmd/man
+/usr/proc/man
+
+/usr/ccs/man
+/usr/public/man
+/usr/freeware/man
+/usr/athena/man
+/usr/amiga/man
+/usr/net/man
+
+### Games
+
+/opt/games/man
+/opt/local/games/man
+/usr/local/games/man
+/usr/games/man
+
+# manpath ends here

@@ -1,0 +1,22 @@
+# paths/mailcaps --- list of MIME mail capability files
+# Author: Noah Friedman <friedman@prep.ai.mit.edu>
+# Created: 1994-11-01
+# Public domain
+#
+# $Id: mailcaps,v 1.2 1995/06/08 17:08:02 friedman Exp $
+#
+# It is possible to use environment variables and subshell commands (stuff
+# in `...`) to get the desired path.  See the examples here.
+#
+# Lines beginning with a '#' are comments.  It's not possible to put
+# comments on the same line as a pathname component.
+#
+
+$sinit/share/mailcap
+$HOME/mail.cap
+$HOME/.mailcap
+/usr/local/etc/mailcap
+/usr/etc/mailcap
+/etc/mailcap
+
+# mimecaps ends here

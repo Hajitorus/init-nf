@@ -1,0 +1,140 @@
+;;; scwmrc
+
+;;; import the scwm modules
+(use-modules (app scwm base)
+	     (app scwm winops)
+	     (app scwm winlist)
+	     (app scwm wininfo)
+             (app scwm style)
+	     (app scwm face))
+
+(define (identity x) x)
+
+(define (mapconcat fn seq separator)
+  (if (null? (cdr seq))
+      (fn (car seq))
+      (string-append (fn (car seq))
+                     separator
+                     (mapconcat fn (cdr seq) separator))))
+
+
+;; Desktop (window) styles
+
+(define (set-window-styles! names . properties)
+  (for-each (lambda (name)
+              (apply window-style name properties))
+            names))
+
+(define desktop-style-default
+  (make-style
+   #:background         "white"
+   #:foreground         "black"
+
+   #:PPosition-hint     #t
+   #:border-width       1
+   #:decorate-transient #t
+   #:focus              'mouse
+   #:plain-border       #t
+
+   #:icon               #f
+   #:icon-box           (list (x- 70) 1 69 (y- 141))
+
+   #:random-placement   #f
+   #:smart-placement    #t
+
+   #:start-iconified    #f
+   #:start-lowered      #f
+   #:start-maximized    #f
+
+   #:stays-on-top       #f
+   #:sticky             #f
+
+   ;; app:scwm:winlist style options
+   #:circulate-skip     #f
+   #:winlist-skip       #f
+   ))
+
+(define desktop-style-no-titlebar
+  (make-style
+   #:use-style   desktop-style-default
+   #:no-titlebar #t))
+
+
+;;; Menus
+
+(if #f
+(define menu-applications
+  (make-menu
+   "Applications"
+   (menu-title)
+   (menu-item "Utilities"    #:action menu-app-utils)
+   (menu-item "Emacs"        #:action menu-app-emacs)
+   (menu-item "WWW"          #:action menu-app-www)
+   (menu-separator)
+   (menu-item "Audio/Video"  #:action menu-app-audio-video)
+   (menu-item "Debuggers"    #:action menu-app-debuggers)
+   (menu-item "Doc Viewers"  #:action menu-app-doc-viewers)
+   (menu-item "Emulators"    #:action menu-app-emulators)
+   (menu-item "Games"        #:action menu-app-games)
+   (menu-item "Sys Monitors" #:action menu-app-sys-monitors)
+   ))
+)
+
+(define umenu-quit
+  (make-menu
+   "Really quit scwm?"
+   (menu-title)
+   (menu-item " "               #:action noop)
+   (menu-item " "               #:action noop)
+   (menu-item "If you wish to"  #:action noop)
+   (menu-item "quit, select"    #:action noop)
+   (menu-item "the ``confirm''" #:action noop)
+   (menu-item "button below."   #:action noop)
+   (menu-item " "               #:action noop)
+   (menu-item " "               #:action noop)
+   (menu-item " "               #:action noop)
+   (menu-item "   CONFIRM"      #:action quit)))
+
+
+(define umenu-root
+  (make-menu
+   "Main Menu"
+   (menu-title)
+;   (menu-item "Applications" #:action umenu-applications)
+;   (menu-item "Managerial"   #:action umenu-managerial)
+;   (menu-item "Misc"         #:action umenu-misc)
+;   (menu-item "Hosts"        #:action umenu-hosts)
+;   (menu-item "Workspaces"   #:action umenu-workspaces)
+   (menu-item "Quit"         #:action umenu-quit)
+   ))
+
+(bind-mouse 'root 1 (lambda () (popup umenu-root)))
+
+
+(define HOME (getenv "HOME"))
+
+(set-image-path!
+ (mapconcat identity
+            (list (string-append HOME "/lib/bitmaps")
+                  "/usr/local/X11/include/X11/pixmaps"
+                  "/usr/local/X11/include/X11/bitmaps"
+                  "/usr/X11R6/include/bitmaps"
+                  "/usr/X11R6/include/X11/bitmaps"
+                  "/usr/openwin/include/bitmaps"
+                  "/usr/dt/include/bitmaps")
+            ":"))
+
+(set-window-styles! '("*")
+                    #:use-style desktop-style-default)
+
+(set-window-styles! '("gemacs"
+                      "msgs"
+                      "screen"
+                      "xbiff"
+                      "xclock"
+                      "xconsole"
+                      "xdaliclock"
+                      "xeyes"
+                      "xgif"
+                      "xload")
+                    #:use-style desktop-style-no-titlebar)

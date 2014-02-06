@@ -1,0 +1,54 @@
+#!/bin/sh
+# $Id: get-xdg-session,v 1.1 2010/02/18 10:47:50 friedman Exp $
+
+get()
+{
+  prg=ctwm
+
+  for pid in `pidof $prg`; do
+    disp=`env-of $pid DISPLAY`
+    case ${disp%.[0-9]} in
+      DISPLAY=${DISPLAY%.[0-9]} ) : ;;
+      * ) continue ;;
+    esac
+
+    eval `env-of $pid '/^(?:XDG|DBUS)_SESSION/'`
+    break
+  done
+}
+
+output()
+{
+  vars='DBUS_SESSION_BUS_ADDRESS
+        XDG_SESSION_COOKIE
+       '
+
+  case $1 in
+    -emacs | emacs )
+      echo "(progn"
+      for var in $vars; do
+        eval val=\"\$$var\"
+        echo "  (setenv \"$var\" \"$val\")"
+      done
+      echo "  )"
+    ;;
+
+    * )
+      for var in $vars; do
+        eval val=\"\$$var\"
+        echo $var=\""$val"\"
+      done
+      echo export $vars
+    ;;
+  esac
+}
+
+main()
+{
+  DISPLAY=${DISPLAY-:0} get "$@"
+  output "$@"
+}
+
+main "$@"
+
+# eof

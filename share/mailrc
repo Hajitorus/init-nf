@@ -1,0 +1,6 @@
+set append dot nosave ask quiet noaskcc showto keep metoo nohold
+set crt=24
+set indentprefix=">"
+set prompt="& "
+ignore Received Message-Id Resent-Message-Id Status Mail-From Return-Path Via
+ignore Posted-Date Errors-To Sender Precedence 

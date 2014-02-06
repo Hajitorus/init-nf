@@ -1,0 +1,110 @@
+;; $Id: hgrc,v 1.10 2011/06/15 23:07:33 friedman Exp $
+
+[alias]
+submit            = commit
+
+mlog              = log --verbose
+                        --follow
+                        --copies
+
+mdiff             = diff --ignore-all-space
+                         --ignore-space-change
+                         --ignore-blank-lines
+
+[ui]
+username          = Noah Friedman <noah@splode.com>
+editor            = ed
+
+[trusted]
+users             = noah, noahf, root, named, openvpn
+groups            = root, wheel, src, named, openvpn
+
+[diff]
+showfunc          = True
+ignorews          = False
+ignorewsamount    = False
+ignoreblanklines  = False
+
+[extensions]
+bookmarks         =
+children          =
+color             =
+convert           =
+keyword           =
+extdiff           =
+fetch             =
+gpg               =
+
+[keywordmaps]
+Author   = {author|user}
+Date     = {date|utcdate}
+Header   = {root}/{file},v {node|short} {date|utcdate} {author|user}
+Id       = {file|basename},v {node|short} {date|utcdate} {author|user}
+RCSFile  = {file|basename},v
+RCSfile  = {file|basename},v
+Revision = {node|short}
+Source   = {root}/{file},v
+
+[keyword]
+**.conf =
+**.el   =
+**.es   =
+**.inc  =
+**.m4   =
+**.pl   =
+**.pm   =
+**.py   =
+**.rb   =
+**.repo =
+**.sh   =
+**rc    =
+
+[bookmarks]
+;; By default, when several bookmarks point to the same changeset, they will
+;; all move forward together. Setting track.current=true will cause
+;; Mercurial to track the bookmark that you are currently using, and only
+;; update it. This is similar to Git's approach to branching.
+track.current    = True
+
+[color]
+status.modified         = magenta  bold
+status.added            = green    bold
+status.removed          = red      bold
+status.deleted          = cyan     bold
+status.unknown          = blue     bold
+status.ignored          = black    bold
+;status.modified        = blue     bold  underline  red_background
+;status.added           = green    bold
+;status.removed         = red      bold             blue_background
+;status.deleted         = cyan     bold  underline
+;status.unknown         = magenta  bold  underline
+;status.ignored         = black    bold
+;;
+status.clean            = none
+status.copied           = none
+;;
+qseries.applied         = blue     bold  underline
+qseries.unapplied       = black    bold
+qseries.missing         = red      bold
+;;
+diff.diffline           = bold
+diff.extended           = cyan     bold
+diff.file_a             = red      bold
+diff.file_b             = green    bold
+diff.hunk               = magenta
+diff.deleted            = red
+diff.inserted           = green
+diff.changed            = white
+diff.trailingwhitespace =          bold             red_background
+
+[gpg]
+cmd = /usr/bin/gpg
+key = BA392878
+
+;; local variables:
+;; mode: conf-windows
+;; comment-start-skip: "[;#]+\\s *"
+;; eval: (modify-syntax-entry ?# "<" conf-mode-syntax-table)
+;; end:
+
+;; eof

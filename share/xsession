@@ -1,0 +1,56 @@
+#!/bin/sh
+# xsession --- X environment bootstrapper for xdm login sessions
+# Author: by Noah Friedman <friedman@prep.ai.mit.edu>
+# Created: 1991-11-01
+# Public domain
+
+# $Id: xsession,v 1.4 1997/08/07 03:10:06 friedman Exp $
+
+# Commentary:
+
+# This is way ugly.  But so is xdm.
+
+# Code:
+
+case "${BASH_VERSION+set}" in
+  set )
+    XSESSION=t
+    TERM=xsession
+    export XSESSION TERM
+    . ~/.bashrc
+    unset TERM XSESSION
+
+    # Bash magic.  If this is set, then an exec that fails will not cause
+    # this script to go away, and we have the opportunity to try other
+    # things.  If the exec does succeed, then this script is simply
+    # overlaid in memory and we have nothing further to worry about.
+    no_exit_on_failed_exec=t
+
+    # my xinitrc depends on a lot of environment variables being set
+    # already, so only run it if we successfully started bash and had a
+    # chance to read .bashrc.
+    if test -n "$XINITRC" -a -f "$XINITRC" ; then
+       exec "$XINITRC"
+    fi
+   ;;
+  * )
+    # See if we can find bash via bash-login -p
+    bashprog=`PATH=$PATH:$HOME/bin/share:$HOME/bin/misc:$HOME/bin/local;
+              export PATH;
+              { bash-login -p ; } 2> /dev/null
+             `
+    case "$bashprog" in
+      '' ) bashprog=bash ;;
+    esac
+    if { "$bashprog" -c : ; } 2> /dev/null ; then
+      SHELL="$bashprog"
+      export SHELL
+      exec "$bashprog" $0 ${1+"$@"}
+    fi
+    esac
+   ;;
+esac
+
+exec xterm
+
+# xsession ends here

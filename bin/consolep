@@ -1,0 +1,16 @@
+#!/bin/sh
+# $Id: consolep,v 1.1 2010/03/02 22:05:41 friedman Exp $
+
+tty=${1-${TTY-`tty 2> /dev/null`}}
+
+case $tty in
+  /dev/console      ) exit 0 ;;
+  /dev/tty[0-9]*    ) exit 0 ;;    # linux
+  /dev/ttyv[0-9a-f] ) exit 0 ;;    # freebsd
+  /dev/vga          ) exit 0 ;;    # ?
+  /dev/hft/*        ) exit 0 ;;    # aix
+esac
+
+exit 1
+
+# eof

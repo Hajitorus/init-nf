@@ -1,0 +1,90 @@
+# hostaliases --- DNS host aliases
+# Author: Noah Friedman <friedman@splode.com>
+# Created: 1995-08-25
+# Public domain
+
+# $Id: hostaliases,v 1.14 2004/01/26 10:15:46 friedman Exp $
+
+# To use this, point your HOSTALIASES environment at this file.
+# If your hosts use nis (nee yp), HOSTALIASES may be ignored.
+
+# Host names used on various systems to reach my cvs repository
+# My machine moves around behind different firewalls and to different ISPs
+# (and in some cases I am forced to deal with dynamic IP).
+# Thus, this indirection.
+cvs-splode           cvs.prv.splode.com
+
+# GNU/AI hosts.
+# prep.ai.mit.edu is the old name for ftp.gnu.org, hence these aliases.
+# `ftp-prep' and `fsf-prep' are defined to help ftp distinguish between
+# anonymous and gnu logins (see mknetrc).
+prep                 ftp.gnu.org
+ftp-prep             ftp.gnu.org
+fsf-prep             ftp.gnu.org
+
+# MIT AI servers
+life                 life.ai.mit.edu
+mini-wheats          mini-wheats.ai.mit.edu
+muesli               muesli.ai.mit.edu
+
+# MIT AI clients
+rc                   rice-chex.ai.mit.edu
+rice-chex            rice-chex.ai.mit.edu
+soggy-fibers         soggy-fibers.ai.mit.edu
+
+# MIT Project MAC (Switzerland) hosts
+martigny             martigny.ai.mit.edu
+ftp-swiss            ftp-swiss.ai.mit.edu
+www-swiss            www-swiss.ai.mit.edu
+berne                berne.ai.mit.edu
+coke                 coke-machine.ai.mit.edu
+
+# GNU hosts
+melange              melange.gnu.org
+alpha                alpha.gnu.org
+mescaline            mescaline.gnu.org
+delysid              delysid.gnu.org
+
+
+# MIT LCS hosts
+mintaka              mintaka.lcs.mit.edu
+lcs                  mintaka.lcs.mit.edu
+mc                   mc.lcs.mit.edu
+bronze               bronze.lcs.mit.edu
+
+# FrobTech hosts
+frob                 baalperazim.frob.com
+baal                 baalperazim.frob.com
+
+# Red Bean hosts
+totoro               totoro.red-bean.com
+floss                floss.red-bean.com
+sanpietro            san-pietro.red-bean.com
+
+# UT Math dept.
+math                 math.utexas.edu
+fireant              fireant.ma.utexas.edu
+julia                julia.ma.utexas.edu
+sp5-1                sp5-1.ma.utexas.edu
+
+# Random
+actlab               home.actlab.utexas.edu
+agchat               chat.silverchat.com
+altavista            www.altavista.com
+cygnus               ftp.cygnus.com
+elisp                archive.cis.ohio-state.edu
+elisp-archive        archive.cis.ohio-state.edu
+eterna               splode.eterna.com.au
+hawkwind             hawkwind.utcs.toronto.edu
+hungry               cvs.hungry.com
+lpf		     lpf.org
+metalab              metalab.unc.edu
+sunsite              sunsite.unc.edu
+tsx-11               tsx-11.mit.edu
+uoknor               independence.ecn.uoknor.edu
+uunet                ftp.uu.net
+wuarchive            wuarchive.wustl.edu
+x                    ftp.x.org
+zenmoo               zenmoo.zennet.com
+
+# hostaliases ends here

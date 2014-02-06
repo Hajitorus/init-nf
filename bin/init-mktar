@@ -1,0 +1,44 @@
+#!/bin/sh
+# $Id: init-mktar,v 1.1 2006/03/11 22:02:24 friedman Exp $
+
+LC_COLLATE=C
+export LC_COLLATE
+
+umask 022
+
+version=`cat $sinit/share/=version`
+
+tarfile=$1
+shift
+
+case $tarfile in
+  *VERSION* ) tarfile=`echo $tarfile | sed -e "s=VERSION=$version=g"` ;;
+esac
+
+case $tarfile in
+  *.tar.bz2       ) compress='bzip2 --best' ;;
+  *.tar.gz | .tgz ) compress='gzip  --best' ;;
+  *.tar           ) compress=cat            ;;
+  *               ) compress='gzip  --best' tarfile=$tarfile.tar.gz ;;
+esac
+
+topdir=`echo "$tarfile" | sed -e 's=.*/==' -e 's/\.tar.*//'`
+
+tmpdir=/tmp/mktar$$
+cleanup() { e=$?; rm -rf $tmpdir; exit $?; }
+trap cleanup 0 1 2 3 15
+mkdir -p $tmpdir/$topdir
+
+#echo "init-mktar: Making $tarfile ..."
+
+find ${1+"$@"} ! -name '*~' ! -name '*.elc' -follow -print \
+  | ${TAR-tar} --no-recursion -T - -chf - \
+  | ${TAR-tar} -xpf - -C $tmpdir/$topdir
+
+( cd $tmpdir
+  find $topdir -print | sort | ${TAR-tar} --no-recursion -T - -cvf -
+) | $compress > "$tarfile"
+
+echo "init-mktar: Made $tarfile"
+
+# eof

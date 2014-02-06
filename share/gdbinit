@@ -1,0 +1,16 @@
+# $Id: gdbinit,v 1.3 1999/11/14 04:01:00 friedman Exp $
+
+display/i $pc
+
+#handle 2 pass nostop noprint
+set confirm off
+set height 0
+set width 0
+
+# Show full contents of data structures, without encoding or compressing
+# repeated chars.
+#set print elements 0
+#set print repeat 0
+
+#file ...
+#set args ...

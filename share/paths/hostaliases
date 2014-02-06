@@ -1,0 +1,8 @@
+# $Id: hostaliases,v 1.1 1996/12/04 03:53:29 friedman Exp $
+#
+# Files in this list are used to determine which hostaliases file to use.
+
+$HOME/.hostaliases
+$sinit/share/hostaliases
+
+# hostaliases ends here

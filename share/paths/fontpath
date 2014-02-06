@@ -1,0 +1,58 @@
+# fontpath --- path for font directories, set using xset
+# Author: Noah Friedman <friedman@splode.com>
+# Created: 1991-07-23
+# Public domain
+#
+# $Id: fontpath,v 1.13 2001/02/19 21:43:02 friedman Exp $
+#
+# It is possible to use environment variables to get the desired path.
+#
+# Lines beginning with a '#' are comments.  It's not possible to put
+# comments on the same line as a pathname component.
+
+$HOME/lib/fonts/bitmap:unscaled
+
+# Unscaled bitmap fonts first; they look better at their intended point
+# sizes than scalable fonts, especially for small point sizes.
+# The `unscaled' attribute is an XFree86 3.3 extension; see the function
+# FontFileAddFontFile in xc/lib/font/fontfile/fontdir.c.
+# Use the cprintpath command to strip font attributes from the path for
+# servers which don't support these extensions.
+
+/usr/X11R6/lib/X11/fonts/misc/:unscaled
+/usr/X11R6/lib/X11/fonts/75dpi/:unscaled
+/usr/X11R6/lib/X11/fonts/100dpi/:unscaled
+
+/usr/openwin/lib/X11/fonts/misc/:unscaled
+/usr/openwin/lib/X11/fonts/75dpi/:unscaled
+/usr/openwin/lib/X11/fonts/100dpi/:unscaled
+/usr/openwin/lib/X11/fonts/F3bitmaps/:unscaled
+
+/usr/lib/X11/fonts/misc/:unscaled
+/usr/lib/X11/fonts/75dpi/:unscaled
+/usr/lib/X11/fonts/100dpi/:unscaled
+
+# Scalable fonts
+$HOME/lib/fonts/Type1
+$HOME/lib/fonts/TrueType
+
+/opt/X11/lib/X11/fonts/Adobe/
+/opt/X11/lib/X11/fonts/Type1/
+/opt/X11/lib/X11/fonts/URW/
+/opt/X11/lib/X11/fonts/freefont/
+/opt/X11/lib/X11/fonts/sharefont/
+/opt/X11/lib/X11/fonts/sgi/
+
+/usr/X11R6/lib/X11/fonts/Type1/
+/usr/X11R6/lib/X11/fonts/Speedo/
+
+/usr/openwin/lib/X11/fonts/Type1/
+#/usr/openwin/lib/X11/fonts/Type3/
+/usr/openwin/lib/X11/fonts/Speedo/
+/usr/openwin/lib/X11/fonts/F3/
+/usr/openwin/lib/X11/fonts/TrueType/
+
+/usr/lib/X11/fonts/Type1/
+/usr/lib/X11/fonts/Speedo/
+
+# fontpath ends here

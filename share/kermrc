@@ -1,0 +1,20 @@
+set line /dev/ttyUSB0
+set speed 115200
+set serial 8N1
+set carrier-watch off
+set flow-control none
+set modem none
+
+set terminal bytesize 8
+set terminal character-set transparent transparent
+
+set file type binary
+set file bytesize 8
+set file character-set ascii
+set file names literal
+
+set xfer mode manual
+set xfer translation off
+
+set input case ignore
+set input echo off

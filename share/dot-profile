@@ -1,0 +1,21 @@
+# $Id: dot-profile,v 1.6 2011/12/09 23:47:42 friedman Exp $
+
+case $0 in
+  -sh | -*/sh )
+    ht=`{ "$HOME/etc/init/bin/hosttype"; } 2> /dev/null`
+    PATH=$PATH:$HOME/bin/arch/$ht/bin:/opt/lude/bin:/opt/local/bin:/usr/local/bin:/usr/sww/bin
+    export PATH
+
+    if { bash -norc -c : ; } 2> /dev/null ; then
+      exec bash -norc -c '
+        oSHELL=$SHELL
+        SHELL=`type -path bash`
+        shopt -s execfail
+        exec -l bash "$@"
+        SHELL=$oSHELL
+        exec -l $SHELL "$@"
+        ' ${1+"$@"}
+    fi ;;
+esac
+
+# eof

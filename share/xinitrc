@@ -1,0 +1,67 @@
+#!/bin/sh
+# xinitrc --- X environment bootstrapper for X sessions
+# Author: Noah Friedman <friedman@splode.com>
+# Public domain
+
+# $Id: xinitrc,v 1.7 2011/07/29 00:46:11 friedman Exp $
+
+# Commentary:
+# Code:
+
+main()
+{
+  log=$HOME/.xinitrc.log
+  case ${XINITRC_DEBUG-notset} in
+    notset ) exec >> ${log}       2>&1          ;;
+         * ) exec >> ${log}.debug 2>&1 ; set -x ;;
+  esac
+
+  cd "$HOME"
+
+  check_consolekit
+
+  SHLVL=0
+
+  try="
+    $HOME/.xinitrc.d
+    $HOME/etc/misc/.xinitrc.d
+    $sinit/share/xinitrc.d
+  "
+  for dir in $try; do
+    test -d $dir || continue
+    run_parts $dir
+    break
+  done
+}
+
+check_consolekit()
+{
+  case ${XINITRC_CK_RESTART+set} in
+    set ) unset XINITRC_CK_RESTART ; return ;;
+  esac
+
+  if where ck-launch-session > /dev/null; then
+    XINITRC_CK_RESTART=1
+    export XINITRC_CK_RESTART
+
+    exec ck-launch-session "$0" ${1+"$@"}
+  fi
+}
+
+run_parts()
+{
+  dir=$1
+  shift
+
+  for script in $dir/*.sh ; do
+    test -f $script || continue
+    case $script in
+      */*-S-* ) . $script ;;
+            * ) /bin/sh $script ;;
+    esac
+  done
+}
+
+main ${1+"$@"}
+
+# xinitrc ends here

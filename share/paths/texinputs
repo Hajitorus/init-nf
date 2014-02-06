@@ -1,0 +1,13 @@
+# paths/texinputs --- directories for TeX input files (e.g. texinfo.tex)
+# Author: Noah Friedman <friedman@prep.ai.mit.edu>
+# Created: 1991-10-22
+# Public domain
+#
+# $Id: texinputs,v 1.2 1994/11/01 19:05:52 friedman Exp $
+#
+.
+$HOME/lib/tex/inputs
+/usr/local/gnu/tex/lib/inputs
+/usr/local/tex/lib/inputs
+/usr/local/lib/tex/inputs
+# texinputs ends here

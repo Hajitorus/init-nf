@@ -1,0 +1,317 @@
+#!/bin/sh
+# mknetrc --- generate ~/.netrc from M4 macros
+# Author: Noah Friedman <friedman@splode.com>
+# Created: 1993-09-30
+# Public domain
+
+# $Id: mknetrc,v 1.56 2011/02/28 20:43:46 friedman Exp $
+
+# Commentary:
+# Code:
+
+datefmt='%Y-%m-%d %H:%M:%S %Z'
+date=`{ strftime -f "$datefmt" || date +"$datefmt"; } 2> /dev/null`
+
+${M4-m4} \
+  -D__file__="$0" \
+  -D__date__="$date" \
+  ${1+"$@"} << '__EOF__'
+`#' .netrc
+`#' Generated __date__ from __file__
+`#' Edit that script and run it rather than editing this file directly.
+
+divert(-1)dnl
+
+# repeats the expansion of text with any occurence of var substituted with
+# the value of any remaining args, i.e.
+#   foreach(`VAR',`arg is VAR\n', arg1, arg2, ...)
+#   => arg is arg1
+#      arg is arg2
+#      arg is ...
+define(`foreach',
+  `ifelse(eval($# < 3),1,,
+          $#`$3',3,,
+          `pushdef(`$1',`$3')`'$2`'popdef(`$1')`'$0(`$1',`$2',shift(shift(shift($@))))')')
+
+define(`NL',`
+')
+
+define(`anonymous_login',    `anonymous')
+define(`anonymous_password', `friedman@splode.com')
+
+define(`std_macdef_init', `macdef init
+		  type binary
+		  prompt off
+		  tick on
+		  quote site idle')
+#		  quote site umask 000
+
+# Arguments:
+#    $1 == hostname
+#    $2 == login name (default anonymous_login)
+#    $3 == password   (default anonymous_password)
+#    $4 == additional macdef init commands
+define(`defmachine',
+`divert(0)dnl
+machine $1
+ifelse($2, , `	login' anonymous_login`'NL,
+       `	login' $2`'NL)dnl
+ifelse($3, , ifelse(`$2', `', `	password' anonymous_password`'NL),
+       `	password' $3`'NL)dnl
+	std_macdef_init
+ifelse($4, , ,
+       `		 ' $4`'NL)
+
+divert(-1)dnl
+')
+
+
+# splode.com machines
+
+foreach(`HOST',
+
+        `defmachine(HOST`.splode.com', `noah')
+         defmachine(HOST,              `noah')',
+
+        `bacon-event-horizon',      `beh',
+        `bacon-von-munchausen',     `bacon',
+        `days-of-swine-and-roses',  `dosar',
+        `nutty-waffle-cone',        `nwc')
+
+
+foreach(`HOST',
+
+        `defmachine(HOST`.prv.splode.com', `noah', `noah')
+         defmachine(HOST,                  `noah', `noah')',
+
+        `bride-of-frankenswine',    `bof',
+        `garbage-collecting',       `gc',
+        `gedanken-donuts',          `gd',
+        `hamlet',
+        `localhost',
+        `mini-waffles',             `mw',
+        `obey-chomsky',             `oc',
+        `piglet',
+        `suppenschwein',
+        `tasty-breakfast-squids',   `tbs',
+        `trabanten-schwein',        `ts',
+        `unexploded-cow',           `uc')
+
+
+# perforce machines
+
+foreach(`HOST',
+
+        `defmachine(HOST`.perforce.com', `noahf')
+         defmachine(HOST,                `noahf')',
+
+        `computer',
+        `server',
+        `play',
+        `doh',
+        `suse91-x64.bnr',
+        `bld-ondemand.bnr',
+        `commander.bnr')
+
+
+# Misc machines where I have accounts
+
+foreach(`HOST',
+
+        `defmachine(HOST, `friedman')',
+
+        `frob.com',
+        `baal.frob.com',
+        `baalperazim.frob.com',
+        `totoro.red-bean.com',
+        `savonarola.red-bean.com',
+        `bronze.lcs.mit.edu',
+        `splode.eterna.com.au')
+
+foreach(`HOST',
+
+        `defmachine(HOST, `noah')',
+
+        `math.utexas.edu',
+        `fireant.ma.utexas.edu',
+        `linux63.ma.utexas.edu')
+
+
+# Anonymous ftp machine with useful default directories
+
+# Mailing lists relating to PCL:
+#   CommonLoops@Xerox.com    --- Announcements, bug reports, fixes, etc.
+#   CommonLoops.pa@Xerox.com --- Send comments, bug reports, suggestions.
+defmachine(`arisia.xerox.com',,,           `cd /pub/pcl')
+
+# GNU Ada Translator
+defmachine(`cs.nyu.edu',,,                 `cd /pub/gnat')
+
+# also /pub/mgleason/getline.tgz, an alternative to readline
+defmachine(`cse.unl.edu',,,                `cd /pub/mgleason/ncftp')
+
+defmachine(`dickey.his.com',,,             `cd /xterm')
+
+defmachine(`download.fedora.redhat.com',,, `cd /pub/fedora/linux')
+
+defmachine(`ftp-swiss.ai.mit.edu',,,       `cd /pub/su/scsh')
+
+defmachine(`ftp.ccil.org',,,               `cd /pub/esr/fetchmail')
+
+# See also /ucb/tcl.
+defmachine(`ftp.cs.berkeley.edu',,,        `cd /ucb/4bsd')
+
+# The Common Lisp Repository
+# Useful ftp.cs.cmu.edu directories:
+#     /afs/cs.cmu.edu/project/ai-repository/ai/lang/lisp/util/emacs/ilisp
+#     /afs/cs.cmu.edu/user/ralf/pub
+defmachine(`ftp.cs.cmu.edu',,,             `cd /afs/cs.cmu.edu/project/ai-repository/ai/lang/lisp')
+
+defmachine(`ftp.cs.hut.fi',,,              `cd /pub/ssh')
+
+# WWW client for emacs
+# Also some Scheme code in /pub/scheme (e.g. hygienic macro package,
+# syntax-caseV2.0.tar.Z)
+# Also /pub/scheme-repository/imp/STk-2.1.tar.Z
+defmachine(`ftp.cs.indiana.edu',,,         `cd /pub/elisp/w3')
+
+defmachine(`ftp.cs.purdue.edu',,,          `cd /pub/RCS')
+
+defmachine(`ftp.cs.tut.fi',,,              `cd /pub/src/languages/schemes')
+
+defmachine(`ftp.cs.ucla.edu',,,            `cd /pub/ispell')
+
+# Holds papers about garbage collection, persistence,
+# and memory hierarchy implementation.
+# See also: /source/util/vmsbackup
+defmachine(`ftp.cs.utexas.edu',,,          `cd /pub/garbage')
+
+# Instructions for retrieving TeX & Metafont are in /pub/tex/FTP.nwc
+defmachine(`ftp.cs.umb.edu',,,             `cd /pub/tex')
+
+# Emacs for Win95/NT
+defmachine(`ftp.cs.washington.edu',,,      `cd /pub/ntemacs')
+
+defmachine(`ftp.cs.wisc.edu',,,            `cd /pub/ghost')
+
+# Also possibly /pub/DBS/OBST
+defmachine(`ftp.fzi.de',,,                 `cd /pub/OBST')
+
+# Infocom compiler and (free) game repository
+# e.g. Curses is available in the file
+# `if-archive/infocom/compilers/inform/curses.z5'
+defmachine(`ftp.gmd.de',,,                 `cd /if-archive/infocom')
+
+defmachine(`ftp.gnu.org',,,                `cd /pub/gnu')
+
+# There are two mailing lists for majordomo:
+# "Majordomo-Users" (for discussions of Majordomo) and
+# "Majordomo-Announce" (for announcements of new releases).
+# To subscribe, send an appropriate "subscribe" command to
+# "Majordomo@GreatCircle.COM".
+defmachine(`ftp.greatcircle.com',,,        `cd /pub/majordomo')
+
+# ILISP sources available here
+# See also /pub/theory/marcoxa/elisp
+defmachine(`ftp.icsi.berkeley.edu',,,      `cd /pub/software/elisp')
+
+# Officially-registered port numbers, country codes, system names, etc.
+defmachine(`ftp.isi.edu',,,                `cd /in-notes/iana/assignments')
+
+# Location of `tm', a MIME package for emacs
+defmachine(`ftp.jaist.ac.jp',,,            `cd /pub/GNU/elisp/mime/beta')
+
+# /pub/systems/conserver-5.11.anl.tar.Z is modified version of the console
+# server in archive.cis.ohio-state.edu:/pub/console-server/
+defmachine(`ftp.mcs.anl.gov',,,            `cd /pub/systems')
+
+defmachine(`ftp.mozilla.org',,,            `cd /pub/mozilla.org')
+
+defmachine(`ftp.openbsd.org',,,            `cd /pub/OpenBSD/OpenSSH/portable')
+
+defmachine(`ftp.smli.com',,,               `cd /pub/tcl')
+
+defmachine(`ftp.uni-erlangen.de',,,        `cd /pub/utilities/screen')
+
+defmachine(`ftp.vix.com',,,                `cd /pub/bind')
+
+# Maintained by Richard Levitte <LEVITTE@e.kth.se>
+defmachine(`ftp.vms.stacken.kth.se',,,     `cd /MIRRORS/GNU-VMS')
+
+defmachine(`ftp.white.toronto.edu',,,      `cd /pub/es')
+
+defmachine(`ftp.xemacs.org',,,             `cd /pub/xemacs')
+
+defmachine(`ftp2.cc.ukans.edu',,,          `cd /pub/lynx')
+
+defmachine(`kermit.columbia.edu',,,        `cd /kermit')
+
+# GNU Common Lisp (formerly, Austin Kyoto Common Lisp)
+# As of 1994-04-30, latest release is gcl-1.0.tgz
+# Also try ftp.cli.com:/pub/gcl (less bandwidth here)
+defmachine(`math.utexas.edu',,,            `cd /pub/gcl')
+
+# formerly [sunsite|metalab].unc.edu
+defmachine(`ftp.ibiblio.org',,,            `cd /pub/Linux')
+
+# ANSI CL draft
+defmachine(`parcftp.xerox.com',,,          `cd /pub/cl/dpANS2')
+
+# Has patches for various AIX programs, etc.
+# For example, patches for the rlogind security hole of May 1994
+# Are in /pub/aix/rlogin/rloginX.tar.Z where X is the highest revision
+# number for their patch.
+defmachine(`software.watson.ibm.com',,,    `cd /pub')
+
+
+# Mac software sites
+defmachine(`ftp.cc.utexas.edu',,,          `cd /microlib/mac')
+
+
+# Hosts which are convenient to have in the efs cache for completion.
+
+# Useful files on ftp.cygnus.com:
+#   pub/bothner/eterm-0.95.tar.gz
+#   pub/lord/guile-ii.tar.gz
+defmachine(`ftp.cygnus.com',,,             `cd /pub')
+
+# Useful ftp.uu.net directories:
+#   ftp://ftp.uu.net/government/usa/house
+#   ftp://ftp.uu.net/government/usa/supreme-court
+#   ftp://ftp.uu.net/networking/mail/vm
+#   ftp://ftp.uu.net/systems/gnu
+#   ftp://ftp.uu.net/inet/rfc
+#   ftp://ftp.uu.net/inet/maps
+#   ftp://ftp.uu.net/languages/emacs-lisp (mirror of elisp archives)
+#   ftp://ftp.uu.net/systems/unix/bsd-sources
+defmachine(`ftp.uu.net',,,                 `cd /networking/mail/vm')
+
+# ftp.x.org used to be export.lcs.mit.edu
+defmachine(`ftp.x.org')
+
+
+# Some versions of ftp don't recognize the `default' keyword, and
+# interpret it as part of the previous entry, causing errors.
+# This entry prevents that from happening.
+divert(0)dnl
+machine zzz.bogus
+
+divert(-1)dnl
+
+# Default entry for all other connections
+divert(0)dnl
+default	login anonymous_login
+	password anonymous_password
+	std_macdef_init
+
+
+divert(-1)dnl
+
+__EOF__
+
+# local variables:
+# mode: m4
+# compile-command: "./mknetrc > $HOME/.netrc"
+# end:
+
+# mknetrc ends here

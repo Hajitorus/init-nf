@@ -1,0 +1,126 @@
+#!/bin/sh
+# cprintpath
+# Author: Noah Friedman <friedman@splode.com>
+# Created: 1992-05-11
+# Public domain
+
+# $Id: cprintpath,v 1.5 2004/04/12 21:34:36 friedman Exp $
+
+# Commentary:
+
+# Parse {file1 files...}, which is assumed to contain a list of directories
+# separated by whitespace (tabs, spaces, or newlines), and construct a
+# string consisting of those directories separated by delimiter (`:' by
+# default), only if those directories actually exist.  Comments in the file
+# (lines beginning with `#') are ignored, but directories and comments
+# cannot exist on the same line.
+
+# If the -f flag was supplied, check for the existence of each entry as a
+# file, rather than a directory.
+
+# Font directory names may have a "font attribute" suffix in the name,
+# a sequence of colon-separated keywords after the directory name
+# (e.g. "/usr/lib/X11/fonts/misc:unscaled").
+#
+# If your input file list includes these attributes, you must use one of
+# the -F or -S options to handle them properly.  The -F option says to
+# process them but not to put them in the resulting generated path.  The -S
+# option says to do so.  You should only use the -S option when generating
+# font paths for servers which support this extension.  At the time of this
+# writing, only XFree86 3.3 and later support this.
+
+# Code:
+
+delim=:
+newlist=
+testop=-d
+handle_fontattr=nil
+fontattr_supported=nil
+
+while : ; do
+  case "$1" in
+    -d | --delimiter | --delim )
+      delim=$2
+      shift
+      shift
+     ;;
+    -f | --file )
+      testop=-f
+      shift
+     ;;
+    -F | --handle-fontattr )
+      handle_fontattr=t
+      shift
+     ;;
+    -S | --fontattr-supported )
+      handle_fontattr=t
+      fontattr_supported=t
+      shift
+     ;;
+    -- )
+      shift
+      break
+     ;;
+    -? | --* )
+      case "$1" in
+        --*=* ) arg=`echo "$1" | sed -e 's/=.*//'` ;;
+        * )     arg="$1" ;;
+      esac
+      exec 1>&2
+      echo "Unknown or ambiguous option $bq$arg$eq"
+      echo "Use $bq--help$eq for a list of options."
+      exit 1
+     ;;
+    -??* )
+      # Split grouped single options into separate args and try again
+      optarg="$1"
+      shift
+      set fnord `echo "x$optarg" | sed -e 's/^x-//;s/\(.\)/-\1 /g'` ${1+"$@"}
+      shift
+     ;;
+    * ) break ;;
+  esac
+done
+
+case $# in
+   0 )
+     echo "Usage: cprintpath {-f} {-d delimiter} [file1] {files...}" 1>&2
+     exit 1
+    ;;
+esac
+
+# Some versions of sed do not accept `-' as a filename arg; others
+# interpret it as "read from stdin", which is what we really want.
+# So make all files be read from stdin.
+eval set fnord `
+  for file in ${1+"$@"}; do
+    case $file in
+      - ) cat ;;
+      * ) cat "$file" ;;
+    esac
+  done | sed -e "/^[	 ]*[#].*/d"`
+shift
+
+for dir in ${1+"$@"} ; do
+   suffix=
+   case "$handle_fontattr:$dir" in
+     t:*:* )
+       case "$fontattr_supported" in t )
+         suffix=`echo "$dir" | sed -e 's/^[^:]*//'` ;;
+       esac
+       dir=`echo "$dir" | sed -e 's/:.*//'`
+      ;;
+   esac
+
+   # Always allow "." and ".."
+   if test "z$dir" = 'z.' -o "$testop" "$dir" ; then
+      case "$newlist" in
+        '') newlist="$dir$suffix" ;;
+        * ) newlist="$newlist$delim$dir$suffix" ;;
+      esac
+   fi
+done
+
+echo "$newlist"
+
+# cprintpath ends here

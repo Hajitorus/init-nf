@@ -1,0 +1,27 @@
+# paths/fignore
+# Author: Noah Friedman <friedman@prep.ai.mit.edu>
+# Created: 1991-11-07
+# Public domain
+
+# $Id: fignore,v 1.2 1997/12/30 01:54:08 friedman Exp $
+
+# File name extensions to be ignored when doing expansion, which appear in
+# the shell variable FIGNORE as a colon-separated list.
+#
+# Lines beginning with a '#' are comments.  It's not possible to put
+# comments on the same line as a pathname component.
+
+.toc
+.aux
+.cp
+.fn
+.tp
+.vr
+.pg
+.ky
+
+# .log
+# .o
+# '~'
+
+# fignore ends here

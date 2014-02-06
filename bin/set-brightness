@@ -1,0 +1,110 @@
+#!/usr/bin/env bash
+# $Id: set-brightness,v 1.2 2012/03/05 16:59:37 friedman Exp $
+# Public domain.
+
+# Using xrandr (via xbacklight) to set the display brightness is the
+# "correct" interface when using X, but (a) it's dog slow, and (b) you
+# can't use it in console mode.  So do it directly via sysfs if possible.
+
+######
+##
+######
+
+sysfs_check_writable()
+{
+  if ! [[ -w $1 ]]; then
+    sudo chmod g+w "$1"
+  fi
+}
+
+sysfs_get_current()
+{
+  disp=${1-$disp}   # if no arg, reuse previous value
+  dispname=${disp##*/}
+
+  min=0
+  read max < $disp/max_brightness
+  read cur < $disp/actual_brightness
+  pct=$((100 * $cur / $max))
+}
+
+sysfs_current()
+{
+  sysfs_get_current
+  echo $pct
+}
+
+sysfs_increase()
+{
+  sysfs_get_current "$@"
+
+  new=$((cur + 1))
+  if [[ $new -le $max ]]; then
+    sysfs_check_writable $disp/brightness
+    echo $new > $disp/brightness
+  fi
+  sysfs_current
+}
+
+sysfs_decrease()
+{
+  sysfs_get_current "$@"
+
+  new=$((cur - 1))
+  if [[ $new -ge $min ]]; then
+    sysfs_check_writable $disp/brightness
+    echo $new > $disp/brightness
+  fi
+  sysfs_current
+}
+
+######
+##
+######
+
+xbacklight_current()
+{
+  pct=`xbacklight`
+  dec=${pct#*.}
+  pct=${pct%.*}
+  case $dec in
+    [5-9]* ) pct=$((pct + 1)) ;;
+  esac
+  echo $pct
+}
+
+xbacklight_increase()
+{
+  xbacklight -inc ${1-10}
+  xbacklight_current
+}
+
+xbacklight_decrease()
+{
+  xbacklight -dec ${1-10}
+  xbacklight_current
+}
+
+main()
+{
+  action=$1
+  case $action in
+    + | inc | -inc ) action=increase ;;
+    - | dec | -dec ) action=decrease ;;
+    '' | status    ) action=current  ;;
+  esac
+
+  if [[ -d /sys/class/backlight ]]; then
+    for disp in /sys/class/backlight/* ; do
+      case ${disp##*/} in
+        acpi_video0 ) sysfs_$action $disp ;;
+      esac
+    done
+  elif [[ -n $DISPLAY ]]; then
+    xbacklight_$action $2
+  fi
+}
+
+main "$@"
+
+# eof

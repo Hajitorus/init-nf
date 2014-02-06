@@ -1,0 +1,25 @@
+# termcapfiles --- possible pathnames of termcap files
+# Author: Noah Friedman <friedman@splode.com>
+# Created: 1995-08-25
+# Public domain
+#
+# $Id: termcapfiles,v 1.6 2006/03/11 20:24:17 friedman Exp $
+#
+# When declaring terminal types, these termcap files are searched to see if
+# they define that termcap entry.  If so, the TERMCAP environment variable
+# is set to that file.
+
+$HOME/.termcap
+$HOME/etc/misc/.termcap
+$HOME/lib/terminfo/termcap
+
+/opt/lude/etc/termcap
+/opt/lude/share/lib/termcap
+/opt/lude/lib/termcap
+
+/etc/termcap
+
+/usr/share/misc/termcap
+/usr/share/lib/termcap
+
+# termcapfiles ends here
